@@ -1,13 +1,4 @@
-_See also the minimal version of this project template in branch_
-_[`minimal`](https://jugit.fz-juelich.de/iek-10/templates/git/python-project-template/-/tree/minimal)._
-_It excludes all open source specific files and is intended especially for_
-_prototypes and projects in an early development stage._
-
-
-```gfm
-# TODO: insert project logo (if any) - replace the below logo location with the location of your logo
-![](https://github.com/lf-energy/artwork/blob/master/projects/{{**PROJECT-NAME**}}/{{**PROJECT-NAME**}}-color.svg)
-```
+![](/media/sf_Projects/Projects/GasNetSim/GasNetSim/GasNetSim_Logo.svg)
 
 ```gfm
 # TODO: Add badges that point to your LICENSE, CII status, and build environment (if it exists). Check out other badges to add at https://shields.io/
@@ -15,9 +6,9 @@ _prototypes and projects in an early development stage._
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/CII ID/badge)](https://bestpractices.coreinfrastructure.org/projects/CII ID)
 ```
 
-# {{**PROJECT-NAME**}}
+# **GasNetSim**
 
-_**TODO** 2-3 sentence description of the project_
+*GasNetSim* is a simulation package designed for gas network steady-state simulation. It supports the simulation with complex gas mixture compositions in the gas network.
 
 ## Installation
 
