@@ -7,9 +7,7 @@
 #    Last change by yifei
 #   *****************************************************************************
 import logging
-import math
 
-from .node import Node
 from .pipeline_function.friction_factor import *
 from .pipeline_function.outlet_temperature import *
 from .gas_mixture.thermo.thermo import Mixture
@@ -84,7 +82,6 @@ class Pipeline:
             return None
 
         return 2./3. * ((p1 + p2) - (p1 * p2) / (p1 + p2))
-
 
     def calc_pipe_slope_correction(self):
         """

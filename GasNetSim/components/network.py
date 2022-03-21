@@ -178,21 +178,21 @@ class Network:
                     if length/max_length < 0.01:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        # pressure_init[j] = pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow))
-                        pressure_init[j] = pressure_init[i] * 0.98
+                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow))
+                        # pressure_init[j] = pressure_init[i] * 0.98
                 elif pressure_init[j] is not None and pressure_init[i] is not None:
                     if length / max_length < 0.01:
                         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
                     else:
-                        # pressure_init[j] = min(pressure_init[j],
-                        #                        pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow)))
-                        pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
+                        pressure_init[j] = min(pressure_init[j],
+                                               pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow)))
+                        # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
                     if length/max_length < 0.01:
                         pressure_init[i] = pressure_init[j] / 0.99999
                     else:
-                        # pressure_init[i] = pressure_init[j] / (1 - 0.05 * (length/max_length)**0.5 * (flow /max_flow))
-                        pressure_init[i] = pressure_init[j] / 0.98
+                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (length/max_length)**0.5 * (flow /max_flow))
+                        # pressure_init[i] = pressure_init[j] / 0.98
 
         return pressure_init
 
@@ -306,13 +306,13 @@ class Network:
                 temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i >= 0 and j >= 0:
-                    jacobian_mat[i][j] = phy_char * p2 * temp_var * 2
-                    jacobian_mat[j][i] = phy_char * p1 * temp_var * 2
+                    jacobian_mat[i][j] = phy_char * p2 * temp_var
+                    jacobian_mat[j][i] = phy_char * p1 * temp_var
 
                 if i >= 0:
-                    jacobian_mat[i][i] += - phy_char * p1 * temp_var * 2
+                    jacobian_mat[i][i] += - phy_char * p1 * temp_var
                 if j >= 0:
-                    jacobian_mat[j][j] += - phy_char * p2 * temp_var * 2
+                    jacobian_mat[j][j] += - phy_char * p2 * temp_var
 
         return jacobian_mat, flow_mat
 
@@ -409,7 +409,7 @@ class Network:
                                                                  P=self.nodes[i_node].pressure)
                     except Exception:
                         print(i_node)
-                        print(i_pipe)
+                        # print(i_pipe)
                         print(nodal_gas_inflow_comp[i_node])
 
             j_mat, f_mat = self.jacobian_matrix()
@@ -425,7 +425,7 @@ class Network:
             f = [x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()]
 
             try:
-                delta_p = np.dot(j_mat_inv, delta_flow)
+                delta_p = np.dot(j_mat_inv, delta_flow) / 2
             except ValueError:
                 print(delta_flow)
 

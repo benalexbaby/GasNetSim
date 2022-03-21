@@ -8,6 +8,7 @@
 #   *****************************************************************************
 from .node import *
 
+
 class Compressor:
     """
     Class to formulate compressor stations.

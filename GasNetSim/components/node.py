@@ -6,9 +6,7 @@
 #    Last change on 1/17/22, 11:20 AM
 #    Last change by yifei
 #   *****************************************************************************
-from .gas_mixture.typical_mixture_composition import *
-from ..components.gas_mixture.thermo.thermo import Mixture
-from ..components.gas_mixture.heating_value import *
+from ..components.gas_mixture import *
 
 
 class Node:
