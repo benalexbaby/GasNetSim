@@ -7,3 +7,5 @@ fluids>=0.1.86
 pint>=0.18
 setuptools>=60.9.3
 requests>=2.25.1
+pyparsing~=3.0.7
+cantera~=2.5.1

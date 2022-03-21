@@ -6,10 +6,10 @@
 #    Last change on 12/21/21, 4:58 PM
 #    Last change by yifei
 #   *****************************************************************************
-import cantera as ct
-from .thermo.thermo import Mixture
 from collections import OrderedDict
-from GasNetSim.components.gas_mixture.typical_mixture_composition import NATURAL_GAS
+import cantera as ct
+
+from .thermo.thermo import Mixture
 
 
 GAS = ct.Solution('gri30.cti')

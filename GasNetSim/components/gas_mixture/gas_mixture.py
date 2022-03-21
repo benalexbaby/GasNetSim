@@ -6,8 +6,9 @@
 #    Last change on 12/21/21, 4:22 PM
 #    Last change by yifei
 #   *****************************************************************************
-from thermo import Mixture
 from collections import OrderedDict
+
+from .thermo.thermo import Mixture
 
 
 class GasMixture:

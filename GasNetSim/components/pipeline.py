@@ -61,10 +61,11 @@ class Pipeline:
             ambient_temp = self.ambient_temp
             t1 = self.inlet.temperature
             t2 = self.outlet.temperature
-            return ambient_temp + (t1 - t2) / math.log((t1 - ambient_temp) / (t2 - ambient_temp))
-        except ZeroDivisionError:
-            return self.inlet.temperature
-        except ValueError:
+            if t1 == ambient_temp or t2 == ambient_temp:
+                return self.inlet.temperature
+            else:
+                return ambient_temp + (t1 - t2) / math.log((t1 - ambient_temp) / (t2 - ambient_temp))
+        except (ZeroDivisionError, ValueError):
             return self.inlet.temperature
 
     def calc_average_pressure(self):

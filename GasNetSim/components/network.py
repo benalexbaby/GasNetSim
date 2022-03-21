@@ -226,7 +226,7 @@ class Network:
             elif node.flow_type == 'energy':
                 gas_comp = node.get_mole_fraction()
                 node.flow = node.flow / HHV * 1e6 / Mixture(zs=gas_comp, T=288.15, P=101325).rho
-                print(node.flow)
+                logging.debug(node.flow)
                 node.flow_type = 'volumetric'
             else:
                 raise AttributeError(f'Unknown flow type {node.flow_type}!')
@@ -317,7 +317,7 @@ class Network:
         return jacobian_mat, flow_mat
 
     def simulation(self):
-        print([x.flow for x in self.nodes.values()])
+        logging.debug([x.flow for x in self.nodes.values()])
         ref_nodes = self.p_ref_nodes_index
 
         n_nodes = len(self.nodes.keys())
@@ -337,8 +337,8 @@ class Network:
         f = np.array(init_f)
         p = np.array(init_p)
         t = np.array(init_t)
-        print(f'Initial pressure: {p}')
-        # print(f'Initial flow: {f}')
+        logging.info(f'Initial pressure: {p}')
+        logging.info(f'Initial flow: {f}')
 
         for i in range(len(init_f)):
             # TODO change to number of non-reference nodes
@@ -398,7 +398,7 @@ class Network:
                     nodal_gas_inflow_comp[i_node] = {k: v / total for k, v in total_inflow_comp.items()}
                     if total_inflow != 0:
                         temperature_new = total_inflow_temperature_times_flow_rate / total_inflow
-                        print(temperature_new)
+                        logging.debug(temperature_new)
 
                         # update node temperature
                         self.nodes[i_node].temperature = temperature_new
@@ -408,9 +408,8 @@ class Network:
                                                                  T=self.nodes[i_node].temperature,
                                                                  P=self.nodes[i_node].pressure)
                     except Exception:
-                        print(i_node)
-                        # print(i_pipe)
-                        print(nodal_gas_inflow_comp[i_node])
+                        logging.debug(i_node)
+                        logging.debug(nodal_gas_inflow_comp[i_node])
 
             j_mat, f_mat = self.jacobian_matrix()
             j_mat_inv = np.linalg.inv(j_mat)
@@ -424,10 +423,8 @@ class Network:
                 n.convert_energy_to_volumetric_flow()
             f = [x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()]
 
-            try:
-                delta_p = np.dot(j_mat_inv, delta_flow) / 2
-            except ValueError:
-                print(delta_flow)
+            delta_p = np.dot(j_mat_inv, delta_flow) / 2
+            logging.debug(delta_p)
 
             p += np.concatenate((np.array([0] * len(ref_nodes)), delta_p), axis=None)
 
@@ -445,8 +442,8 @@ class Network:
             j_mat, f_mat = self.jacobian_matrix()
             delta_flow = f[len(ref_nodes):] - np.dot(f_mat, np.ones(n_nodes))[len(ref_nodes):]
 
-            print(max([abs(x) for x in (delta_flow/f[len(ref_nodes):])]))
-            print(delta_p)
+            logging.debug(max([abs(x) for x in (delta_flow/f[len(ref_nodes):])]))
+            logging.debug(delta_p)
 
             if max([abs(x) for x in (delta_flow/f[len(ref_nodes):])]) <= 0.001:
                 logger.info(f'Simulation converges in {n_iter} iterations.')
@@ -461,7 +458,7 @@ class Network:
                         pipe_h2_fraction.append(pipe.get_mole_fraction()['hydrogen'] * 100)
                     except KeyError:
                         pipe_h2_fraction.append(0)
-                print(pipe_h2_fraction)
+                logging.debug(pipe_h2_fraction)
                 for pipe in self.pipelines.values():
                     pipe.flow_rate = pipe.calc_flow_rate()
                 return self

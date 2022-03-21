@@ -9,12 +9,12 @@
 import pandas as pd
 import numpy as np
 from collections import OrderedDict
+from pathlib import Path
 
-from GasNetSim.components.pipeline import Pipeline
+from ..components.pipeline import Pipeline
 from ..components.node import Node
 from ..components.network import Network
 from ..utils.exception import *
-from pathlib import Path
 
 
 def read_nodes(path_to_file: Path) -> dict:

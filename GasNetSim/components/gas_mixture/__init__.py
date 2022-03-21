@@ -6,12 +6,6 @@
 #    Last change on 12/21/21, 4:57 PM
 #    Last change by yifei
 #   *****************************************************************************
-import sys
-import os
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "thermo"))
-
-from cantera import *
 from .GERG2008 import *
 from .thermo.thermo import *
 from .gas_mixture import *

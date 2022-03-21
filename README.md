@@ -1,4 +1,4 @@
-![](/media/sf_Projects/Projects/GasNetSim/GasNetSim/GasNetSim_Logo.svg)
+py![](/media/sf_Projects/Projects/GasNetSim/GasNetSim/GasNetSim_Logo.svg)
 
 ```gfm
 # TODO: Add badges that point to your LICENSE, CII status, and build environment (if it exists). Check out other badges to add at https://shields.io/
