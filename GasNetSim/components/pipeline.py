@@ -8,6 +8,7 @@
 #   *****************************************************************************
 import logging
 
+from .node import *
 from .pipeline_function.friction_factor import *
 from .pipeline_function.outlet_temperature import *
 from .gas_mixture.thermo.thermo import Mixture
