@@ -1,4 +1,4 @@
-# {{PROJECT-NAME}} Python Package
+# GasNetSim
 
 The project's packages, modules and scripts.
 
