@@ -1,10 +1,6 @@
-py![](/media/sf_Projects/Projects/GasNetSim/GasNetSim/GasNetSim_Logo.svg)
+![](https://jugit.fz-juelich.de/iek-10/public/simulation/gasnetsim/-/tree/dev/doc/GasNetSim_Logo.svg)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
-```gfm
-# TODO: Add badges that point to your LICENSE, CII status, and build environment (if it exists). Check out other badges to add at https://shields.io/
-![GitHub](https://img.shields.io/github/license/lfenergy/{{**PROJECT-NAME**}})
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/CII ID/badge)](https://bestpractices.coreinfrastructure.org/projects/CII ID)
-```
 
 # **GasNetSim**
 
