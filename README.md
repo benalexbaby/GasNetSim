@@ -1,4 +1,4 @@
-![](https://jugit.fz-juelich.de/iek-10/public/simulation/gasnetsim/-/tree/dev/doc/GasNetSim_Logo.svg)
+![](doc/GasNetSim_Logo.svg)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 
@@ -11,6 +11,10 @@
 _**TODO** Provide installation steps here or point to an_
 _[INSTALL.md](INSTALL.md) file if the installation instructions require more_
 _than just a few lines._
+
+## License
+
+The project is released under the terms of the [MPL 2.0](https://mozilla.org/MPL/2.0/).
 
 ## Discussion
 
