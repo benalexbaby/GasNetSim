@@ -181,21 +181,21 @@ class Network:
                     if length/max_length < 0.01:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        # pressure_init[j] = pressure_init[i] * (1 - 0.02 * (length/max_length)**0.5 * (flow/max_flow))
-                        pressure_init[j] = pressure_init[i] * 0.98
+                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow))
+                        # pressure_init[j] = pressure_init[i] * 0.98
                 elif pressure_init[j] is not None and pressure_init[i] is not None:
                     if length / max_length < 0.01:
                         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
                     else:
-                        # pressure_init[j] = min(pressure_init[j],
-                                               # pressure_init[i] * (1 - 0.02 * (length/max_length)**0.5 * (flow/max_flow)))
-                        pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
+                        pressure_init[j] = min(pressure_init[j],
+                                               pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow)))
+                        # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
                     if length/max_length < 0.01:
                         pressure_init[i] = pressure_init[j] / 0.99999
                     else:
-                        # pressure_init[i] = pressure_init[j] / (1 - 0.02 * (length/max_length)**0.5 * (flow /max_flow))
-                        pressure_init[i] = pressure_init[j] / 0.98
+                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (length/max_length)**0.5 * (flow /max_flow))
+                        # pressure_init[i] = pressure_init[j] / 0.98
 
         return pressure_init
 

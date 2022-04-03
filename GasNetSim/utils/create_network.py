@@ -45,7 +45,7 @@ def read_pipelines(path_to_file: Path, network_nodes: dict) -> dict:
     """
 
     :param path_to_file:
-    :param
+    :param network_nodes:
     :return:
     """
     pipelines = dict()
@@ -87,7 +87,7 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
     :return:
     """
     all_files = list(path_to_folder.glob('*.csv'))
-    nodes = read_nodes(Path('./' + all_files[0].stem.split('_')[0] + '_nodes.csv'))
+    nodes = read_nodes(Path('./' + '_'.join(all_files[0].stem.split('_')[:-1]) + '_nodes.csv'))
     for file in all_files:
         file_name = file.stem
         if 'node' in file_name:
