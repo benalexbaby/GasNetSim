@@ -6,7 +6,7 @@
 #    Last change on 1/17/22, 11:20 AM
 #    Last change by yifei
 #   *****************************************************************************
-from ..components.gas_mixture import *
+from .utils.gas_mixture import *
 
 
 class Node:
@@ -52,14 +52,14 @@ class Node:
         if flow is None and pressure_pa is None:
             raise InitializationError("Either pressure or flow should be known.")
         try:
-            self.gas_mixture = Mixture(zs=self.gas_composition,
-                                       T=self.temperature_K,
-                                       P=self.pressure_pa)
+            self.gas_mixture = GasMixture(composition=self.gas_composition,
+                                          temperature=self.temperature,
+                                          pressure=self.pressure)
         except (TypeError, AttributeError):
             # If pressure or temperature is missing for some nodes
-            self.gas_mixture = Mixture(zs=self.gas_composition,
-                                       T=288.15,
-                                       P=50 * 101325)
+            self.gas_mixture = GasMixture(composition=self.gas_composition,
+                                          temperature=288.15,
+                                          pressure=50 * 101325)
 
         self.flow = flow
         if self.flow_type == 'volumetric':
@@ -79,24 +79,28 @@ class Node:
 
     def update_gas_mixture(self):
         try:
-            self.gas_mixture = Mixture(zs=self.get_mole_fraction(),
-                                       T=self.temperature,
-                                       P=self.pressure_pa)
+            self.gas_mixture = GasMixture(composition=self.get_mole_fraction(),
+                                          temperature=self.temperature,
+                                          pressure=self.pressure)
         except (TypeError, AttributeError):
-            self.gas_mixture = Mixture(zs=NATURAL_GAS_gri30,
-                                       T=288.15,
-                                       P=50 * 101325)
+            self.gas_mixture = GasMixture(composition=NATURAL_GAS_gri30,
+                                          temperature=288.15,
+                                          pressure=50 * 101325)
 
     def get_mole_fraction(self):
         """
         Get mole fraction of the gas composition at node
         :return: Gas mole fraction
         """
-        mole_fraction = dict()
-        for i in range(len(self.gas_mixture.components)):
-            gas = self.gas_mixture.components[i]
-            mole_fraction[gas] = self.gas_mixture.zs[i]
-        return mole_fraction
+        # mole_fraction = dict()
+        # thermo_mixture = Mixture(zs=self.gas_mixture.composition,
+        #                          T=self.gas_mixture.temperature,
+        #                          P=self.gas_mixture.pressure)
+        # for i in range(len(thermo_mixture.zs)):
+        #     gas = thermo_mixture.IDs[i]
+        #     mole_fraction[gas] = thermo_mixture.zs[i]
+        # return mole_fraction
+        return self.gas_mixture.composition
 
     def convert_energy_to_volumetric_flow(self):
         """
@@ -105,7 +109,9 @@ class Node:
         """
         HHV = calc_heating_value(self.gas_mixture)
         gas_comp = self.get_mole_fraction()
-        self.volumetric_flow = self.energy_flow / HHV * 1e6 / Mixture(zs=gas_comp, T=288.15, P=101325).rho
+        self.volumetric_flow = self.energy_flow / HHV * 1e6 / GasMixture(composition=gas_comp,
+                                                                         temperature=288.15,
+                                                                         pressure=101325).density
 
     def convert_volumetric_to_energy_flow(self):
         """
@@ -114,11 +120,13 @@ class Node:
         """
         HHV = calc_heating_value(self.gas_mixture)
         gas_comp = self.get_mole_fraction()
-        self.energy_flow = self.volumetric_flow * HHV / 1e6 * Mixture(zs=gas_comp, T=288.15, P=101325).rho
+        self.energy_flow = self.volumetric_flow * HHV / 1e6 * GasMixture(composition=gas_comp,
+                                                                         temperature=288.15,
+                                                                         pressure=101325).density
 
 
 if __name__ == "__main__":
-    from gas_mixture.typical_mixture_composition import *
+    from GasNetSim.components.utils.gas_mixture.typical_mixture_composition import *
     # from ..components.gas_mixture.thermo.thermo import Mixture
     # from ..components.gas_mixture.heating_value import *
     Node(flow=None, pressure_pa=None, temperature=300)

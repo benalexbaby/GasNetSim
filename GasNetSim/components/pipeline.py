@@ -7,11 +7,13 @@
 #    Last change by yifei
 #   *****************************************************************************
 import logging
+import math
 
 from .node import *
-from .pipeline_function.friction_factor import *
-from .pipeline_function.outlet_temperature import *
-from .gas_mixture.thermo.thermo import Mixture
+from .utils.pipeline_function.friction_factor import *
+from .utils.pipeline_function.outlet_temperature import *
+from .utils.gas_mixture.gas_mixture import *
+# from thermo import Mixture
 
 
 class Pipeline:
@@ -91,20 +93,12 @@ class Pipeline:
         caused by the pressure difference
         :return: Slope correction factor
         """
-
-        if self.gas_mixture.SG is not None:
-            specific_gravity = self.gas_mixture.SG
-        else:
-            logging.warning("Specific gravity is not available, using the SG for gas!")
-            specific_gravity = self.gas_mixture.SGg
+        specific_gravity = self.gas_mixture.specific_gravity
         h1 = self.inlet.altitude
         h2 = self.outlet.altitude
         avg_pressure = self.calc_average_pressure()
         avg_temperature = self.calc_average_temperature()
-        if self.gas_mixture.Z is not None:
-            z = self.gas_mixture.Z
-        else:
-            z = self.gas_mixture.Zg
+        z = self.gas_mixture.compressibility
 
         try:
             return 0.06835 * specific_gravity * (h2 - h1) * avg_pressure ** 2 / (z * avg_temperature)
@@ -119,7 +113,7 @@ class Pipeline:
         flow_rate = self.flow_rate
         if flow_rate is not None:
             cross_section = math.pi * (self.diameter/2)**2
-            return flow_rate * 101325 / 288.15 * self.calc_average_temperature() / self.calc_average_pressure() / cross_section
+            return flow_rate * 101325/288.15 * self.calc_average_temperature() / self.calc_average_pressure()/cross_section
         else:
             return None
 
@@ -131,7 +125,7 @@ class Pipeline:
         if self.flow_rate is not None:
             flow_velocity = self.calc_flow_velocity()
             return reynold_number(diameter=self.diameter, velocity=flow_velocity,
-                                  rho=self.gas_mixture.rho, viscosity=self.gas_mixture.mu)
+                                  rho=self.gas_mixture.density, viscosity=self.gas_mixture.viscosity)
         else:
             # if the flow rate cannot be calculated yet, set the Reynolds number to be 1e7
             return 1e7
@@ -175,23 +169,17 @@ class Pipeline:
         d = self.diameter
         length = self.length
         avg_temperature = self.calc_average_temperature()
-        if self.gas_mixture.Z is not None:
-            z = self.gas_mixture.Z
-        else:
-            z = self.gas_mixture.Zg
+        z = self.gas_mixture.compressibility
         e = self.efficiency
         f = self.calculate_pipe_friction_factor()
         if f is None:
             f = 0.01
-        if self.gas_mixture.SG is not None:
-            specific_gravity = self.gas_mixture.SG
-        else:
-            specific_gravity = self.gas_mixture.SGg
+        specific_gravity = self.gas_mixture.specific_gravity
 
         if specific_gravity < 0:
             specific_gravity = 0.5
-            print(self.gas_mixture.zs)
-            print("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
+            logging.debug(self.gas_mixture.zs)
+            logging.warning("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
 
         return (13.29 * tb / pb) * (d ** 2.5) * \
                ((1 / (length * specific_gravity * avg_temperature * z * f)) ** 0.5) * e
@@ -234,7 +222,9 @@ class Pipeline:
         :return: Mass flow rate [kg/s]
         """
         q = self.calc_flow_rate()
-        gas_rho = Mixture(zs=self.get_mole_fraction(), P=101325, T=288.15).rho
+        gas_rho = GasMixture(composition=self.get_mole_fraction(),
+                             pressure=101325,
+                             temperature=288.15).density
         return q * gas_rho
 
     def calc_pipe_outlet_temp(self):
@@ -244,9 +234,11 @@ class Pipeline:
         """
         qm = self.calc_gas_mass_flow()
         friction = self.calculate_pipe_friction_factor()
-        if qm is not None and friction is not None and self.gas_mixture.Cp is not None:
-            beta = calc_beta(ul=3.69, qm=qm, cp=self.gas_mixture.Cp, d=self.diameter)
-            gamma = calc_gamma(mu_jt=self.gas_mixture.JT, z=self.gas_mixture.Z, R=self.gas_mixture.R_specific,
+        if qm is not None and friction is not None and self.gas_mixture.heat_capacity_constant_pressure is not None:
+            beta = calc_beta(ul=3.69, qm=qm, cp=self.gas_mixture.heat_capacity_constant_pressure, d=self.diameter)
+            gamma = calc_gamma(mu_jt=self.gas_mixture.joule_thomson_coefficient,
+                               z=self.gas_mixture.compressibility,
+                               R=self.gas_mixture.R_specific,
                                f=friction, qm=qm, p_a=self.calc_average_pressure(), D=self.diameter)
             return outlet_temp(beta=beta, gamma=gamma, Ts=self.ambient_temp, L=self.length, T1=self.inlet.temperature)
         else:
@@ -258,11 +250,12 @@ class Pipeline:
         Get mole fraction of the gas composition inside pipeline
         :return: Gas mole fraction
         """
-        mole_fraction = dict()
-        for i in range(len(self.gas_mixture.components)):
-            gas = self.gas_mixture.components[i]
-            try:
-                mole_fraction[gas] = self.gas_mixture.zs[i]
-            except TypeError:
-                print(mole_fraction)
-        return mole_fraction
+        # mole_fraction = dict()
+        # for i in range(len(self.gas_mixture.IDs)):
+        #     gas = self.gas_mixture.IDs[i]
+        #     try:
+        #         mole_fraction[gas] = self.gas_mixture.zs[i]
+        #     except TypeError:
+        #         print(mole_fraction)
+        # return mole_fraction
+        return self.gas_mixture.composition

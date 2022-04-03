@@ -1,3 +1,12 @@
+#   #!/usr/bin/env python
+#   -*- coding: utf-8 -*-
+#   ******************************************************************************
+#     Copyright (c) 2022.
+#     Developed by Yifei Lu
+#     Last change on 3/28/22, 12:44 AM
+#     Last change by yifei
+#    *****************************************************************************
+import math
 from multiprocessing import connection
 from pyparsing import col
 from scipy import sparse
@@ -46,3 +55,8 @@ def backward_substitution(U, z):
     x = np.zeros(n_row)
 
     return x
+
+
+def levenberg_marquardt_damping_factor(m, s, b):
+    return 10**(m*math.log10(s+b))
+

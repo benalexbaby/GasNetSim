@@ -8,8 +8,7 @@
 #    *****************************************************************************
 import matplotlib.pyplot as plt
 import GasNetSim as Gns
-from GasNetSim.components.pipeline_function.outlet_temperature import *
-from GasNetSim.components.gas_mixture.heating_value import *
+from GasNetSim.components.utils.gas_mixture.heating_value import *
 
 if __name__ == "__main__":
     from collections import OrderedDict

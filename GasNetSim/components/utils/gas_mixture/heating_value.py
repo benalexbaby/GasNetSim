@@ -10,26 +10,30 @@ from collections import OrderedDict
 import cantera as ct
 
 from .thermo.thermo import Mixture
-
+# from thermo import Mixture
+from .gas_mixture import *
 
 GAS = ct.Solution('gri30.cti')
 
 
-def get_mole_fraction(gas_mixture: Mixture):
+def get_mole_fraction(gas_mixture: GasMixture):
     """
     Get mole fraction of the gas composition at node
     :return: Gas mole fraction
     """
+    thermo_mixture = Mixture(zs=gas_mixture.composition,
+                             T=gas_mixture.temperature,
+                             P=gas_mixture.pressure)
     mole_fraction = dict()
-    for i in range(len(gas_mixture.components)):
-        gas = gas_mixture.formulas[i]
-        mole_fraction[gas] = gas_mixture.zs[i]
+    for i in range(len(thermo_mixture.zs)):
+        gas = thermo_mixture.formulas[i]
+        mole_fraction[gas] = thermo_mixture.zs[i]
     return mole_fraction
 
 
 def calc_heating_value(gas_mixture, heating_value_type='HHV'):
     """ Returns the LHV and HHV for the specified fuel """
-    GAS.TPX = gas_mixture.T, gas_mixture.P, get_mole_fraction(gas_mixture)
+    GAS.TPX = gas_mixture.temperature, gas_mixture.pressure, get_mole_fraction(gas_mixture)
     GAS.set_equivalence_ratio(1.0, get_mole_fraction(gas_mixture), 'O2:1.0')
     h1 = GAS.enthalpy_mass
     Y_fuel = 1 - GAS['O2'].Y[0]

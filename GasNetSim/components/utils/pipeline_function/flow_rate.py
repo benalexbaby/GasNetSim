@@ -8,7 +8,7 @@
 #   *****************************************************************************
 import math
 import logging
-from ...utils.exception import ZeroFlowError
+from GasNetSim.utils.exception import ZeroFlowError
 
 
 def calculate_pipeline_average_temperature(t_ambient, t1, t2):

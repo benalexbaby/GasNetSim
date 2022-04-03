@@ -9,13 +9,13 @@
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "gas_mixture/thermo"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "utils/gas_mixture/thermo"))
 
 from .node import Node
 from .pipeline import Pipeline
 from .network import Network
-from .pipeline_function import *
-from .gas_mixture import *
+from GasNetSim.components.utils.pipeline_function import *
+from GasNetSim.components.utils.gas_mixture import *
 
 
 

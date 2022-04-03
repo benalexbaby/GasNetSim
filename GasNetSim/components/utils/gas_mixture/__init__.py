@@ -7,7 +7,7 @@
 #    Last change by yifei
 #   *****************************************************************************
 from .GERG2008 import *
-from .thermo.thermo import *
+# from .thermo.thermo import *
 from .gas_mixture import *
 from .heating_value import *
 from .typical_mixture_composition import *

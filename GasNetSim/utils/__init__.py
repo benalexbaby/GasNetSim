@@ -6,5 +6,7 @@
 #    Last change on 3/14/22, 9:40 PM
 #    Last change by yifei
 #   *****************************************************************************
+import pandas as pd
+
 from .exception import *
 from .create_network import *

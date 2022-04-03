@@ -12,7 +12,10 @@ from typing import Tuple
 from scipy import sparse
 import logging
 import copy
+from collections import OrderedDict
 
+from .utils.gas_mixture.heating_value import *
+from .utils.utils import *
 from .node import *
 from .pipeline import *
 from .utils import *
@@ -90,7 +93,7 @@ class Network:
     def convert_energy_flow_to_volumetric_flow(self, base='HHV'):
         for node in self.nodes.values():
             gas_comp = node.get_mole_fraction()
-            standard_density = Mixture(P=101325, T=288.15, zs=gas_comp).rho
+            standard_density = GasMixture(pressure=101325, temperature=288.15, composition=gas_comp).density
             LHV, HHV = calc_heating_value(node.gas_mixture)
             if base == 'HHV':
                 heating_value = HHV/1e6*standard_density  # MJ/sm3
@@ -178,21 +181,21 @@ class Network:
                     if length/max_length < 0.01:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow))
-                        # pressure_init[j] = pressure_init[i] * 0.98
+                        # pressure_init[j] = pressure_init[i] * (1 - 0.02 * (length/max_length)**0.5 * (flow/max_flow))
+                        pressure_init[j] = pressure_init[i] * 0.98
                 elif pressure_init[j] is not None and pressure_init[i] is not None:
                     if length / max_length < 0.01:
                         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
                     else:
-                        pressure_init[j] = min(pressure_init[j],
-                                               pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow)))
-                        # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
+                        # pressure_init[j] = min(pressure_init[j],
+                                               # pressure_init[i] * (1 - 0.02 * (length/max_length)**0.5 * (flow/max_flow)))
+                        pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
                     if length/max_length < 0.01:
                         pressure_init[i] = pressure_init[j] / 0.99999
                     else:
-                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (length/max_length)**0.5 * (flow /max_flow))
-                        # pressure_init[i] = pressure_init[j] / 0.98
+                        # pressure_init[i] = pressure_init[j] / (1 - 0.02 * (length/max_length)**0.5 * (flow /max_flow))
+                        pressure_init[i] = pressure_init[j] / 0.98
 
         return pressure_init
 
@@ -225,7 +228,9 @@ class Network:
                 pass
             elif node.flow_type == 'energy':
                 gas_comp = node.get_mole_fraction()
-                node.flow = node.flow / HHV * 1e6 / Mixture(zs=gas_comp, T=288.15, P=101325).rho
+                node.flow = node.flow / HHV * 1e6 / GasMixture(composition=gas_comp,
+                                                               temperature=288.15,
+                                                               pressure=101325).density
                 logging.debug(node.flow)
                 node.flow_type = 'volumetric'
             else:
@@ -404,9 +409,9 @@ class Network:
                         self.nodes[i_node].temperature = temperature_new
 
                     try:
-                        self.nodes[i_node].gas_mixture = Mixture(zs=nodal_gas_inflow_comp[i_node],
-                                                                 T=self.nodes[i_node].temperature,
-                                                                 P=self.nodes[i_node].pressure)
+                        self.nodes[i_node].gas_mixture = GasMixture(composition=nodal_gas_inflow_comp[i_node],
+                                                                    temperature=self.nodes[i_node].temperature,
+                                                                    pressure=self.nodes[i_node].pressure)
                     except Exception:
                         logging.debug(i_node)
                         logging.debug(nodal_gas_inflow_comp[i_node])
@@ -421,12 +426,14 @@ class Network:
             # Update volumetric flow rate target
             for n in self.nodes.values():
                 n.convert_energy_to_volumetric_flow()
-            f = [x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()]
+            f = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
             delta_p = np.dot(j_mat_inv, delta_flow) / 2
             logging.debug(delta_p)
 
             p += np.concatenate((np.array([0] * len(ref_nodes)), delta_p), axis=None)
+
+            # TODO Newton-Raphson with Jacobian adjustment
 
             for i in self.nodes.keys():
                 if i not in ref_nodes:
