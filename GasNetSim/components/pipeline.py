@@ -168,9 +168,24 @@ class Pipeline:
         pb = 101325  # Pressure base, 1 bar
         d = self.diameter
         length = self.length
+        # avg_temperature = self.calc_average_temperature()
+        # z = self.gas_mixture.compressibility
+        e = self.efficiency
+        # f = self.calculate_pipe_friction_factor()
+        # if f is None:
+        #     f = 0.01
+        # specific_gravity = self.gas_mixture.specific_gravity
+
+        # if specific_gravity < 0:
+        #     specific_gravity = 0.5
+        #     logging.debug(self.gas_mixture.zs)
+        #     logging.warning("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
+
+        return (13.29 * tb / pb) * (d ** 2.5) * ((1 / length)**0.5) * e
+
+    def calculate_coefficient_for_iteration(self):
         avg_temperature = self.calc_average_temperature()
         z = self.gas_mixture.compressibility
-        e = self.efficiency
         f = self.calculate_pipe_friction_factor()
         if f is None:
             f = 0.01
@@ -181,8 +196,9 @@ class Pipeline:
             logging.debug(self.gas_mixture.zs)
             logging.warning("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
 
-        return (13.29 * tb / pb) * (d ** 2.5) * \
-               ((1 / (length * specific_gravity * avg_temperature * z * f)) ** 0.5) * e
+        pipeline_physical_characteristic = self.calc_physical_char_gas_pipe()
+
+        return pipeline_physical_characteristic / (specific_gravity * avg_temperature * z * f)**0.5
 
     def determine_flow_direction(self):
         """
@@ -211,10 +227,11 @@ class Pipeline:
         flow_direction = self.determine_flow_direction()
         p1 = self.inlet.pressure
         p2 = self.outlet.pressure
-        slope_correction = self.calc_pipe_slope_correction()
-        pipe_physical_char = self.calc_physical_char_gas_pipe()
 
-        return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * pipe_physical_char
+        slope_correction = self.calc_pipe_slope_correction()
+        temp = self.calculate_coefficient_for_iteration()
+
+        return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * temp
 
     def calc_gas_mass_flow(self):
         """
@@ -244,7 +261,6 @@ class Pipeline:
         else:
             return self.ambient_temp
 
-
     def get_mole_fraction(self):
         """
         Get mole fraction of the gas composition inside pipeline
@@ -259,3 +275,8 @@ class Pipeline:
         #         print(mole_fraction)
         # return mole_fraction
         return self.gas_mixture.composition
+
+
+class Resistance(Pipeline):
+    def __int__(self, resistance=None):
+        self.resistance = resistance

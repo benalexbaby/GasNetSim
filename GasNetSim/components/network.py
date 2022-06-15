@@ -123,38 +123,41 @@ class Network:
 
         # Build a matrix to show the connection between nodes
         connection = np.zeros((n_nodes, n_nodes))
-        for pipe in pipelines.values():
-            i = pipe.inlet_index - 1
-            j = pipe.outlet_index - 1
-            if sparse_matrix:
-                row_ind.append(i)
-                col_ind.append(j)
-                data.append(1)
-            else:
-                connection[i][j] = 1
-                connection[j][i] = 1
 
-        for compressor in compressors.values():
-            i = compressor.inlet_index - 1
-            j = compressor.outlet_index - 1
-            if sparse_matrix:
-                row_ind.append(i)
-                col_ind.append(j)
-                data.append(2)
-            else:
-                connection[i][j] = 2
-                connection[j][i] = 2
+        if pipelines is not None:
+            for pipe in pipelines.values():
+                i = pipe.inlet_index - 1
+                j = pipe.outlet_index - 1
+                if sparse_matrix:
+                    row_ind.append(i)
+                    col_ind.append(j)
+                    data.append(1)
+                else:
+                    connection[i][j] = 1
+                    connection[j][i] = 1
 
-        for resistance in resistances.values():
-            i = resistance.inlet_index - 1
-            j = resistance.outlet_index - 1
-            if sparse_matrix:
-                row_ind.append(i)
-                col_ind.append(j)
-                data.append(3)
-            else:
-                connection[i][j] = 3
-                connection[j][i] = 3
+        if compressors is not None:
+            for compressor in compressors.values():
+                i = compressor.inlet_index - 1
+                j = compressor.outlet_index - 1
+                if sparse_matrix:
+                    row_ind.append(i)
+                    col_ind.append(j)
+                    data.append(2)
+                else:
+                    connection[i][j] = 2
+                    connection[j][i] = 2
+        if resistances is not None:
+            for resistance in resistances.values():
+                i = resistance.inlet_index - 1
+                j = resistance.outlet_index - 1
+                if sparse_matrix:
+                    row_ind.append(i)
+                    col_ind.append(j)
+                    data.append(3)
+                else:
+                    connection[i][j] = 3
+                    connection[j][i] = 3
 
         return connection
 
@@ -212,12 +215,7 @@ class Network:
         n_nodes = len(nodes)
 
         # Build a matrix to show the connection between nodes
-        connection = np.zeros((n_nodes, n_nodes))
-        for pipe in pipelines.values():
-            i = pipe.inlet_index - 1
-            j = pipe.outlet_index - 1
-            connection[i][j] = 1
-            connection[j][i] = 1
+        connection = self.connection_matrix()
 
         # TODO consider the case where ref_nodes do not start with index 0
         p_ref_nodes = self.p_ref_nodes_index
@@ -307,17 +305,17 @@ class Network:
                 slope_corr = pipe.calc_pipe_slope_correction()
                 p1 = pipe.inlet.pressure
                 p2 = pipe.outlet.pressure
-                phy_char = pipe.calc_physical_char_gas_pipe()
+                pipeline_coefficient = pipe.calculate_coefficient_for_iteration()
                 temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i >= 0 and j >= 0:
-                    jacobian_mat[i][j] = phy_char * p2 * temp_var
-                    jacobian_mat[j][i] = phy_char * p1 * temp_var
+                    jacobian_mat[i][j] = pipeline_coefficient * p2 * temp_var
+                    jacobian_mat[j][i] = pipeline_coefficient * p1 * temp_var
 
                 if i >= 0:
-                    jacobian_mat[i][i] += - phy_char * p1 * temp_var
+                    jacobian_mat[i][i] += - pipeline_coefficient * p1 * temp_var
                 if j >= 0:
-                    jacobian_mat[j][j] += - phy_char * p2 * temp_var
+                    jacobian_mat[j][j] += - pipeline_coefficient * p2 * temp_var
 
         return jacobian_mat, flow_mat
 
@@ -326,12 +324,7 @@ class Network:
         ref_nodes = self.p_ref_nodes_index
 
         n_nodes = len(self.nodes.keys())
-        connection_matrix = np.zeros((n_nodes, n_nodes))
-        for pipe in self.pipelines.values():
-            i = pipe.inlet_index - 1
-            j = pipe.outlet_index - 1
-            connection_matrix[i][j] = 1
-            connection_matrix[j][i] = 1
+        connection_matrix = self.connection_matrix()
 
         init_f, init_p, init_t = self.newton_raphson_initialization()
 
