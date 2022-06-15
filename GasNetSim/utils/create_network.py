@@ -88,17 +88,29 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
     """
     all_files = list(path_to_folder.glob('*.csv'))
     nodes = read_nodes(Path('./' + '_'.join(all_files[0].stem.split('_')[:-1]) + '_nodes.csv'))
+
+    network_components = {'node': nodes,  # the dataset should have at least node
+                          'pipeline': None,
+                          'compressor': None,
+                          'resistance': None}
+
     for file in all_files:
         file_name = file.stem
         if 'node' in file_name:
             pass
         elif 'pipeline' in file_name:
             pipelines = read_pipelines(file, nodes)
+            network_components['pipeline'] = pipelines
         elif 'compressor' in file_name:
             compressors = read_compressors(file)
+            network_components['compressor'] = compressors
         elif 'resistance' in file_name:
             resistances = read_resistances(file)
+            network_components['resistance'] = resistances
         else:
             raise FileNameError(f'Please check the file name {file_name}.csv')
 
-    return Network(nodes=nodes, pipelines=pipelines)
+    return Network(nodes=network_components['node'],
+                   pipelines=network_components['pipeline'],
+                   compressors=network_components['compressor'],
+                   resistances=network_components['resistance'])
