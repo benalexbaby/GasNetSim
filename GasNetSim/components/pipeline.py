@@ -1,11 +1,11 @@
-#  #!/usr/bin/env python
-#  -*- coding: utf-8 -*-
-#  ******************************************************************************
-#    Copyright (c) 2021.
-#    Developed by Yifei Lu
-#    Last change on 12/21/21, 4:17 PM
-#    Last change by yifei
-#   *****************************************************************************
+#   #!/usr/bin/env python
+#   -*- coding: utf-8 -*-
+#   ******************************************************************************
+#     Copyright (c) 2022.
+#     Developed by Yifei Lu
+#     Last change on 6/19/22, 11:11 AM
+#     Last change by yifei
+#    *****************************************************************************
 import logging
 import math
 
@@ -47,6 +47,7 @@ class Pipeline:
         self.flow_rate = None
         self.mass_flow_rate = None
         self.roughness = roughness
+        self.resistance = self.calc_physical_char_gas_pipe()
         self.valve = valve
         self.gas_mixture = self.inlet.gas_mixture
         self.friction_factor_method = friction_factor_method
@@ -277,6 +278,83 @@ class Pipeline:
         return self.gas_mixture.composition
 
 
-class Resistance(Pipeline):
-    def __int__(self, resistance=None):
+class Resistance:
+    def __init__(self, inlet: Node, outlet: Node, resistance=1e-6):
+        self.inlet = inlet
+        self.outlet = outlet
+        self.inlet_index = inlet.index
+        self.outlet_index = outlet.index
         self.resistance = resistance
+        self.flow_rate = None
+        self.gas_mixture = self.inlet.gas_mixture
+
+    def update_gas_mixture(self):
+        self.gas_mixture = self.inlet.gas_mixture
+
+    def calc_pipe_slope_correction(self):
+        return 0
+
+    def calculate_coefficient_for_iteration(self):
+        avg_temperature = 288.15  # TODO temperature calculation for resistance
+        z = self.gas_mixture.compressibility
+        f = 0.01
+        specific_gravity = self.gas_mixture.specific_gravity
+
+        if specific_gravity < 0:
+            specific_gravity = 0.5
+            logging.debug(self.gas_mixture.zs)
+            logging.warning("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
+
+        return self.resistance / (specific_gravity * avg_temperature * z * f)**0.5
+
+    def determine_flow_direction(self):
+        """
+        Determine the flow direction inside a pipeline
+        :return: -1 or 1, respectively from inlet to outlet or contrariwise
+        """
+        p1 = self.inlet.pressure
+        p2 = self.outlet.pressure
+        slope_correction = 0  # TODO slope correction equals 0?
+
+        try:
+            p1 ** 2 - p2 ** 2 - slope_correction
+        except ValueError or TypeError:
+            print(f'p1: {p1}, p2: {p2}')
+        if p1 ** 2 - p2 ** 2 - slope_correction > 0:
+            return 1
+        elif p1 ** 2 - p2 ** 2 - slope_correction < 0:
+            return -1
+        else:
+            raise ValueError('Got condition case 0.')
+
+    def calc_flow_rate(self):
+        """
+        Calculate the volumetric flow rate through the pipe
+        :return: Volumetric flow rate [sm3/s]
+        """
+        flow_direction = self.determine_flow_direction()
+        p1 = self.inlet.pressure
+        p2 = self.outlet.pressure
+
+        slope_correction = 0
+        temp = self.calculate_coefficient_for_iteration()
+
+        return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * temp
+
+    def calc_gas_mass_flow(self):
+        """
+        Calculate gas mass flow rate through the pipe
+        :return: Mass flow rate [kg/s]
+        """
+        q = self.calc_flow_rate()
+        gas_rho = GasMixture(composition=self.gas_mixture.composition,
+                             pressure=101325,
+                             temperature=288.15).density
+        return q * gas_rho
+
+    def calc_pipe_outlet_temp(self):
+        """
+
+        :return:
+        """
+        return 288.15

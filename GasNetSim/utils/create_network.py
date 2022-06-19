@@ -11,7 +11,7 @@ import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 
-from ..components.pipeline import Pipeline
+from ..components.pipeline import Pipeline, Resistance
 from ..components.node import Node
 from ..components.network import Network
 from ..utils.exception import *
@@ -70,13 +70,21 @@ def read_compressors(path_to_file: Path) -> dict:
     return compressors
 
 
-def read_resistances(path_to_file: Path) -> dict:
+def read_resistances(path_to_file: Path, network_nodes: dict) -> dict:
     """
 
     :param path_to_file:
+    :param network_nodes:
     :return:
     """
     resistances = dict()
+    df_resistance = pd.read_csv(path_to_file, delimiter=';')
+    df_resistance = df_resistance.replace({np.nan: None})
+
+    for row_index, row in df_resistance.iterrows():
+        resistances[row['resistance_index']] = Resistance(inlet=network_nodes[row['inlet_index']],
+                                                          outlet=network_nodes[row['outlet_index']],
+                                                          resistance=row['resistance'])
     return resistances
 
 
@@ -105,7 +113,7 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
             compressors = read_compressors(file)
             network_components['compressor'] = compressors
         elif 'resistance' in file_name:
-            resistances = read_resistances(file)
+            resistances = read_resistances(file, nodes)
             network_components['resistance'] = resistances
         else:
             raise FileNameError(f'Please check the file name {file_name}.csv')

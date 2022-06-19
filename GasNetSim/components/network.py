@@ -39,10 +39,30 @@ class Network:
         self.pipelines = pipelines
         self.compressors = compressors
         self.resistances = resistances
+        self.connections = self.all_edge_components()
+        self.connection_matrix = self.create_connection_matrix()
         self.p_ref_nodes = [x for x in self.nodes.values() if x.node_type == 'reference']
         self.t_ref_nodes = [x for x in self.nodes.values() if x.node_type == 'reference']
         self.p_ref_nodes_index = [x for x, y in self.nodes.items() if y.node_type == 'reference']
         self.t_ref_nodes_index = [x for x, y in self.nodes.items() if y.node_type == 'reference']
+
+    def all_edge_components(self):
+        connections = dict()
+
+        i_connection = 0
+        if self.pipelines is not None:
+            for pipe in self.pipelines.values():
+                connections[i_connection] = pipe
+                i_connection += 1
+        if self.resistances is not None:
+            for r in self.resistances.values():
+                connections[i_connection] = r
+                i_connection += 1
+        if self.compressors is not None:
+            for compressor in self.compressors.values():
+                connections[i_connection] = compressor
+                i_connection += 1
+        return connections
 
     def find_reference_nodes(self) -> Tuple[list, list]:
         """
@@ -83,11 +103,14 @@ class Network:
         :return:
         """
         nodal_supply_pipelines = dict()
-        for i_pipe, pipe in self.pipelines.items():
-            if nodal_supply_pipelines.get(pipe.outlet_index) is not None:
-                nodal_supply_pipelines[pipe.outlet_index].append(i_pipe)
-            else:
-                nodal_supply_pipelines[pipe.outlet_index] = [i_pipe]
+
+        if self.connections is not None:
+            for i_connection, connection in self.connections.items():
+                if nodal_supply_pipelines.get(connection.outlet_index) is not None:
+                    nodal_supply_pipelines[connection.outlet_index].append(i_connection)
+                else:
+                    nodal_supply_pipelines[connection.outlet_index] = [i_connection]
+
         return OrderedDict(sorted(nodal_supply_pipelines.items()))
 
     def convert_energy_flow_to_volumetric_flow(self, base='HHV'):
@@ -110,7 +133,7 @@ class Network:
                 # node.flow /= (h2_fraction * 12.09 + (1-h2_fraction) * 38.28)
         return None
 
-    def connection_matrix(self, sparse_matrix=False):
+    def create_connection_matrix(self, sparse_matrix=False):
         # TODO change the index number
         n_nodes = len(self.nodes.values())
         pipelines = self.pipelines
@@ -163,8 +186,23 @@ class Network:
 
     def pressure_initialization(self):
         nodes = self.nodes
-        pipelines = self.pipelines
-        max_length = max([x.length for x in pipelines.values()])
+
+        # create a list to store all component resistance
+        resistance = list()
+        if self.pipelines is not None:
+            pipeline_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+                                   for x in self.pipelines.values()]
+            print(pipeline_resistance)
+            resistance += pipeline_resistance
+        if self.resistances is not None:
+            resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+                                     for x in self.resistances.values()]
+            print(resistance_resistance)
+            resistance += resistance_resistance
+
+        print(resistance)
+
+        min_resistance = min([x[2] for x in resistance])
         max_flow = max([x.flow for x in nodes.values() if x.flow is not None])
         pressure_init = [node.pressure for node in nodes.values()]
         # pipeline_with_missing_pressure = copy.deepcopy(pipelines)
@@ -173,31 +211,31 @@ class Network:
         while pressure_init != pressure_init_old:
             pressure_init_old = copy.deepcopy(pressure_init)
             # pipeline_initialized = list()
-            for i_pipe, pipe in pipelines.items():
-                i = pipe.inlet_index - 1
-                j = pipe.outlet_index - 1
-                length = pipe.length
-                flow = pipe.outlet.flow
+            for r in resistance:
+                i = r[0] - 1  # inlet index
+                j = r[1] - 1  # outlet index
+                res = r[2]  # resistance
+                flow = r[3]
                 if pressure_init[i] is None and pressure_init[j] is None:
                     pass
                 elif pressure_init[j] is None or pressure_init[i] == pressure_init[j]:
-                    if length/max_length < 0.01:
+                    if res/min_resistance > 100:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow))
+                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (res/min_resistance)**0.5 * (flow/max_flow))
                         # pressure_init[j] = pressure_init[i] * 0.98
                 elif pressure_init[j] is not None and pressure_init[i] is not None:
-                    if length / max_length < 0.01:
+                    if res/min_resistance > 100:
                         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
                     else:
                         pressure_init[j] = min(pressure_init[j],
-                                               pressure_init[i] * (1 - 0.05 * (length/max_length)**0.5 * (flow/max_flow)))
+                                               pressure_init[i] * (1 - 0.05 * (res/min_resistance)**0.5 * (flow/max_flow)))
                         # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
-                    if length/max_length < 0.01:
+                    if res/min_resistance > 100:
                         pressure_init[i] = pressure_init[j] / 0.99999
                     else:
-                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (length/max_length)**0.5 * (flow /max_flow))
+                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (res/min_resistance)**0.5 * (flow /max_flow))
                         # pressure_init[i] = pressure_init[j] / 0.98
 
         return pressure_init
@@ -211,11 +249,12 @@ class Network:
 
         nodes = self.nodes
         pipelines = self.pipelines
+        resistances = self.resistances
 
         n_nodes = len(nodes)
 
         # Build a matrix to show the connection between nodes
-        connection = self.connection_matrix()
+        connection = self.create_connection_matrix()
 
         # TODO consider the case where ref_nodes do not start with index 0
         p_ref_nodes = self.p_ref_nodes_index
@@ -247,15 +286,6 @@ class Network:
 
         if None in pressure_init:
             pressure_init = self.pressure_initialization()
-        # logger.debug(pressure_init)
-        # for i in range(len(pressure_init)):
-        #     for j in range(len(pressure_init)):
-        #         if connection[i][j] != 0 and pressure_init[i] is None and pressure_init[j] is None:
-        #             pass
-        #         elif connection[i][j] != 0 and (pressure_init[j] is None or pressure_init[i] == pressure_init[j]):
-        #             pressure_init[j] = pressure_init[i] * 0.98
-        #         elif connection[i][j] != 0 and pressure_init[i] is None:
-        #             pressure_init[i] = pressure_init[j] / 0.98
 
         for i in range(len(nodal_flow_init)):
             # TODO change to number of non-reference nodes
@@ -265,20 +295,21 @@ class Network:
             nodes[i + 1].convert_volumetric_to_energy_flow()
             nodes[i + 1].temperature = temperature_init[i]
 
-        for index, pipe in pipelines.items():
-            pipe.inlet = nodes[pipe.inlet_index]
-            pipe.outlet = nodes[pipe.outlet_index]
+        if pipelines is not None:
+            for index, pipe in pipelines.items():
+                pipe.inlet = nodes[pipe.inlet_index]
+                pipe.outlet = nodes[pipe.outlet_index]
 
-            # try:
-            #     pipe.update_gas_mixture()
-            # except TypeError:
-            #     raise ValueError("Something is wrong with gas mixture initialization...")
+        if resistances is not None:
+            for index, r in resistances.items():
+                r.inlet = nodes[r.inlet_index]
+                r.outlet = nodes[r.outlet_index]
 
         return nodal_flow_init, pressure_init, temperature_init
 
     def jacobian_matrix(self):
 
-        pipelines = self.pipelines
+        connections = self.connections
         nodes = self.nodes
         p_ref_nodes, t_ref_nodes = self.p_ref_nodes, self.t_ref_nodes
         # p_ref_nodes_index, t_ref_nodes_index = self.p_ref_nodes_index, self.t_ref_nodes_index
@@ -292,20 +323,20 @@ class Network:
         jacobian_mat = np.zeros((n_non_ref_nodes, n_non_ref_nodes), dtype=np.float)
         flow_mat = np.zeros((n_nodes, n_nodes), dtype=np.float)
 
-        for pipe in pipelines.values():
-            flow_mat[pipe.inlet_index - 1][pipe.outlet_index - 1] = - pipe.calc_flow_rate()
-            flow_mat[pipe.outlet_index - 1][pipe.inlet_index - 1] = pipe.calc_flow_rate()
+        for connection in connections.values():
+            flow_mat[connection.inlet_index - 1][connection.outlet_index - 1] = - connection.calc_flow_rate()
+            flow_mat[connection.outlet_index - 1][connection.inlet_index - 1] = connection.calc_flow_rate()
 
-            if pipe.inlet_index in p_ref_nodes and pipe.outlet_index in p_ref_nodes:
+            if connection.inlet_index in p_ref_nodes and connection.outlet_index in p_ref_nodes:
                 pass
             else:
-                i = pipe.inlet_index - 1 - len(p_ref_nodes)
-                j = pipe.outlet_index - 1 - len(p_ref_nodes)
+                i = connection.inlet_index - 1 - len(p_ref_nodes)
+                j = connection.outlet_index - 1 - len(p_ref_nodes)
 
-                slope_corr = pipe.calc_pipe_slope_correction()
-                p1 = pipe.inlet.pressure
-                p2 = pipe.outlet.pressure
-                pipeline_coefficient = pipe.calculate_coefficient_for_iteration()
+                slope_corr = connection.calc_pipe_slope_correction()
+                p1 = connection.inlet.pressure
+                p2 = connection.outlet.pressure
+                pipeline_coefficient = connection.calculate_coefficient_for_iteration()
                 temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i >= 0 and j >= 0:
@@ -324,7 +355,7 @@ class Network:
         ref_nodes = self.p_ref_nodes_index
 
         n_nodes = len(self.nodes.keys())
-        connection_matrix = self.connection_matrix()
+        connection_matrix = self.connection_matrix
 
         init_f, init_p, init_t = self.newton_raphson_initialization()
 
@@ -345,10 +376,17 @@ class Network:
             self.nodes[i + 1].temperature = init_t[i]
             self.nodes[i + 1].update_gas_mixture()
 
-        for index, pipe in self.pipelines.items():
-            pipe.inlet = self.nodes[pipe.inlet_index]
-            pipe.outlet = self.nodes[pipe.outlet_index]
-            pipe.update_gas_mixture()
+        if self.pipelines is not None:
+            for index, pipe in self.pipelines.items():
+                pipe.inlet = self.nodes[pipe.inlet_index]
+                pipe.outlet = self.nodes[pipe.outlet_index]
+                pipe.update_gas_mixture()
+
+        if self.resistances is not None:
+            for index, r in self.resistances.items():
+                r.inlet = self.nodes[r.inlet_index]
+                r.outlet = self.nodes[r.outlet_index]
+                r.update_gas_mixture()
 
         delta_flow = 0
 
@@ -367,20 +405,20 @@ class Network:
                 else:
                     nodal_gas_inflow_comp[i_node] = 0
 
-                    supply_pipelines = [self.pipelines[j] for j in demand_node_supply_pipelines[i_node]]
+                    supply_pipelines = [self.connections[j] for j in demand_node_supply_pipelines[i_node]]
 
                     total_inflow_comp = dict()
                     total_inflow = 0
                     total_inflow_temperature_times_flow_rate = 0
-                    for pipe in supply_pipelines:
-                        pipe.gas_mixture = pipe.inlet.gas_mixture
-                        inflow_rate = pipe.calc_flow_rate()
+                    for connection in supply_pipelines:
+                        connection.gas_mixture = connection.inlet.gas_mixture
+                        inflow_rate = connection.calc_flow_rate()
                         if inflow_rate > 0:
                             # Sum up flow rate * temperature
-                            total_inflow_temperature_times_flow_rate += inflow_rate * pipe.calc_pipe_outlet_temp()
+                            total_inflow_temperature_times_flow_rate += inflow_rate * connection.calc_pipe_outlet_temp()
                             total_inflow += inflow_rate
 
-                            gas_comp = pipe.get_mole_fraction()
+                            gas_comp = connection.gas_mixture.composition
                             # create a OrderedDict to store gas flow fractions
                             gas_flow_comp = OrderedDict({gas: comp * inflow_rate for gas, comp in gas_comp.items()})
                             for gas, comp in gas_flow_comp.items():
@@ -432,9 +470,9 @@ class Network:
                 if i not in ref_nodes:
                     self.nodes[i].pressure = p[i - 1]
 
-            for i_pipe, pipe in self.pipelines.items():
-                pipe.inlet = self.nodes[pipe.inlet_index]
-                pipe.outlet = self.nodes[pipe.outlet_index]
+            for i_connection, connection in self.connections.items():
+                connection.inlet = self.nodes[connection.inlet_index]
+                connection.outlet = self.nodes[connection.outlet_index]
 
             record.append(delta_p)
 
@@ -450,17 +488,17 @@ class Network:
                 logger.info(p)
                 logger.debug(init_p)
                 pipe_h2_fraction = list()
-                for i_pipe, pipe in self.pipelines.items():
-                    logger.debug(f'Pipeline index: {i_pipe}')
-                    logger.debug(f'Pipeline flow rate: {pipe.flow_rate}')
-                    logger.debug(f'Gas mixture composition: {pipe.get_mole_fraction()}')
+                for i_connection, connection in self.connections.items():
+                    logger.debug(f'Pipeline index: {i_connection}')
+                    logger.debug(f'Pipeline flow rate: {connection.flow_rate}')
+                    logger.debug(f'Gas mixture composition: {connection.gas_mixture.composition}')
                     try:
-                        pipe_h2_fraction.append(pipe.get_mole_fraction()['hydrogen'] * 100)
+                        pipe_h2_fraction.append(connection.gas_mixture.composition['hydrogen'] * 100)
                     except KeyError:
                         pipe_h2_fraction.append(0)
                 logging.debug(pipe_h2_fraction)
-                for pipe in self.pipelines.values():
-                    pipe.flow_rate = pipe.calc_flow_rate()
+                for connection in self.connections.values():
+                    connection.flow_rate = connection.calc_flow_rate()
                 return self
 
             if n_iter >= max_iter:
