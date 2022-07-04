@@ -16,7 +16,7 @@ network_resistance = pd.DataFrame(columns=['resistance_index', 'inlet_index', 'o
 
 i = 0
 for pipe in network.pipelines.values():
-    resistance = pipe.calc_physical_char_gas_pipe()
+    resistance = pipe.calculate_fictitious_resistance()
     new_row = pd.DataFrame([[i+1, pipe.inlet_index, pipe.outlet_index, resistance]],
                            columns=['resistance_index', 'inlet_index', 'outlet_index', 'resistance'])
     network_resistance = pd.concat([network_resistance, new_row], ignore_index=True)
