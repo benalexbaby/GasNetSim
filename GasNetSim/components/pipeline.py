@@ -291,7 +291,7 @@ class Pipeline:
 
 
 class Resistance:
-    def __init__(self, inlet: Node, outlet: Node, resistance=1e-6):
+    def __init__(self, inlet: Node, outlet: Node, resistance=1e6):
         self.inlet = inlet
         self.outlet = outlet
         self.inlet_index = inlet.index
@@ -317,7 +317,7 @@ class Resistance:
             logging.debug(self.gas_mixture.zs)
             logging.warning("Gas mixture specific gravity is smaller than 0, set it as default value 0.5.")
 
-        return self.resistance / (specific_gravity * avg_temperature * z * f)**0.5
+        return 1 / (specific_gravity * avg_temperature * z * f)**0.5 / self.resistance
 
     def determine_flow_direction(self):
         """
