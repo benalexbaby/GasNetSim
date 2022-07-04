@@ -16,6 +16,10 @@ from .utils.gas_mixture.gas_mixture import *
 # from thermo import Mixture
 
 
+STANDARD_TEMPERATURE = 288.15
+STANDARD_PRESSURE = 101325
+
+
 class Pipeline:
     """
     Class for gas transmission pipelines
@@ -47,7 +51,7 @@ class Pipeline:
         self.flow_rate = None
         self.mass_flow_rate = None
         self.roughness = roughness
-        self.resistance = self.calc_physical_char_gas_pipe()
+        self.resistance = self.calculate_fictitious_resistance()
         self.valve = valve
         self.gas_mixture = self.inlet.gas_mixture
         self.friction_factor_method = friction_factor_method
@@ -157,6 +161,14 @@ class Pipeline:
             return nikuradse(d=self.diameter, epsilon=self.roughness)
         elif method == 'colebrook-white':
             return colebrook_white(epsilon=self.roughness, d=self.diameter, N_re=self.calculate_reynolds_number())
+
+    def calculate_fictitious_resistance(self):
+        tb = STANDARD_TEMPERATURE
+        pb = STANDARD_PRESSURE
+        d = self.diameter
+        length = self.length
+        e = self.efficiency
+        return pb * length**0.5 / (13.29 * tb * d**2.5 * e)
 
     def calc_physical_char_gas_pipe(self):
         """
@@ -357,4 +369,5 @@ class Resistance:
 
         :return:
         """
+        # TODO: non-static method
         return 288.15

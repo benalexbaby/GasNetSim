@@ -192,17 +192,13 @@ class Network:
         if self.pipelines is not None:
             pipeline_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
                                    for x in self.pipelines.values()]
-            print(pipeline_resistance)
             resistance += pipeline_resistance
         if self.resistances is not None:
             resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
                                      for x in self.resistances.values()]
-            print(resistance_resistance)
             resistance += resistance_resistance
 
-        print(resistance)
-
-        min_resistance = min([x[2] for x in resistance])
+        max_resistance = max([x[2] for x in resistance])
         max_flow = max([x.flow for x in nodes.values() if x.flow is not None])
         pressure_init = [node.pressure for node in nodes.values()]
         # pipeline_with_missing_pressure = copy.deepcopy(pipelines)
@@ -219,23 +215,23 @@ class Network:
                 if pressure_init[i] is None and pressure_init[j] is None:
                     pass
                 elif pressure_init[j] is None or pressure_init[i] == pressure_init[j]:
-                    if res/min_resistance > 100:
+                    if res/max_resistance < 0.001:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (res/min_resistance)**0.5 * (flow/max_flow))
+                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (res/max_resistance)* (flow/max_flow))
                         # pressure_init[j] = pressure_init[i] * 0.98
                 elif pressure_init[j] is not None and pressure_init[i] is not None:
-                    if res/min_resistance > 100:
+                    if res/max_resistance < 0.001:
                         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
                     else:
                         pressure_init[j] = min(pressure_init[j],
-                                               pressure_init[i] * (1 - 0.05 * (res/min_resistance)**0.5 * (flow/max_flow)))
+                                               pressure_init[i] * (1 - 0.05 * (res/max_resistance) * (flow/max_flow)))
                         # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
-                    if res/min_resistance > 100:
+                    if res/max_resistance < 0.001:
                         pressure_init[i] = pressure_init[j] / 0.99999
                     else:
-                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (res/min_resistance)**0.5 * (flow /max_flow))
+                        pressure_init[i] = pressure_init[j] / (1 - 0.05 * (res/max_resistance) * (flow /max_flow))
                         # pressure_init[i] = pressure_init[j] / 0.98
 
         return pressure_init
