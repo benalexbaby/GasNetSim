@@ -218,15 +218,15 @@ class Network:
                     if res/max_resistance < 0.001:
                         pressure_init[j] = pressure_init[i] * 0.999999
                     else:
-                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (res/max_resistance)* (flow/max_flow))
+                        pressure_init[j] = pressure_init[i] * (1 - 0.05 * (res/max_resistance) * (flow/max_flow))
                         # pressure_init[j] = pressure_init[i] * 0.98
-                elif pressure_init[j] is not None and pressure_init[i] is not None:
-                    if res/max_resistance < 0.001:
-                        pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
-                    else:
-                        pressure_init[j] = min(pressure_init[j],
-                                               pressure_init[i] * (1 - 0.05 * (res/max_resistance) * (flow/max_flow)))
-                        # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
+                # elif pressure_init[j] is not None and pressure_init[i] is not None:
+                #     if res/max_resistance < 0.001:
+                #         pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.99999)
+                #     else:
+                #         pressure_init[j] = min(pressure_init[j],
+                #                                pressure_init[i] * (1 - 0.05 * (res/max_resistance) * (flow/max_flow)))
+                #         # pressure_init[j] = min(pressure_init[j], pressure_init[i] * 0.98)
                 elif pressure_init[i] is None and pressure_init[j] is not None:
                     if res/max_resistance < 0.001:
                         pressure_init[i] = pressure_init[j] / 0.99999
