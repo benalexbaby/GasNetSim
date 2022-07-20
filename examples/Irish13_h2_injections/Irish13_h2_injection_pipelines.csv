@@ -13,6 +13,3 @@ pipeline_index;inlet_index;outlet_index;diameter_m;length_m; is_bothDirection;ma
 12;2;7;0.76;135000;;;;
 13;14;15;0.6;15000;;;;
 14;14;16;0.6;13000;;;;
-15;4;7;0.6;1000;;;;
-16;5;9;0.6;1000;;;;
-17;6;11;0.6;1000;;;;

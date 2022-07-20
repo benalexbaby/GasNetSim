@@ -13,7 +13,7 @@ from scipy import sparse
 import numpy as np
 
 
-def create_connection_matrix(n_nodes: int, components: dict, component_type: int, sparse_matrix: bool=False):
+def create_connection_matrix(n_nodes: int, components: dict, component_type: int, sparse_matrix: bool = False):
     row_ind = list()
     col_ind = list()
     data = list()
@@ -31,11 +31,11 @@ def create_connection_matrix(n_nodes: int, components: dict, component_type: int
         else:
             cnx[i][j] = component_type
             cnx[j][i] = component_type
-    
+
     if sparse_matrix:
         cnx = sparse.coo_matrix((data, (row_ind, col_ind)))
     return cnx
-    
+
 
 def forward_substitution(L, b):
     n_row = len(b)
@@ -44,7 +44,7 @@ def forward_substitution(L, b):
 
     for row in range(n_row):
         res = b[row]
-        for i in range(row-1, -1):
+        for i in range(row - 1, -1):
             res = res - L[row, i] * z[i]
         z[row] = res
     return z
@@ -58,5 +58,13 @@ def backward_substitution(U, z):
 
 
 def levenberg_marquardt_damping_factor(m, s, b):
-    return 10**(m*math.log10(s+b))
+    return 10 ** (m * math.log10(s + b))
 
+
+def delete_matrix_rows_and_columns(matrix, to_remove):
+    new_matrix = matrix
+
+    new_matrix = np.delete(new_matrix, to_remove, 0)  # delete rows
+    new_matrix = np.delete(new_matrix, to_remove, 1)  # delete columns
+
+    return new_matrix

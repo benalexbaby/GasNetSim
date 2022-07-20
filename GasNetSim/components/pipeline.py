@@ -371,3 +371,69 @@ class Resistance:
         """
         # TODO: non-static method
         return 288.15
+
+
+class ShortPipe:
+    def __init__(self, inlet: Node, outlet: Node):
+        self.inlet = inlet
+        self.outlet = outlet
+        self.inlet_index = inlet.index
+        self.outlet_index = outlet.index
+        self.flow_rate = - self.inlet.flow  # Short pipes are used to connect to supply nodes
+        self.gas_mixture = self.inlet.gas_mixture
+
+    def update_gas_mixture(self):
+        self.gas_mixture = self.inlet.gas_mixture
+
+    def calc_pipe_slope_correction(self):
+        return 0
+
+    def calculate_coefficient_for_iteration(self):
+        return 0
+
+    def determine_flow_direction(self):
+        """
+        Determine the flow direction inside a pipeline
+        :return: -1 or 1, respectively from inlet to outlet or contrariwise
+        """
+        p1 = self.inlet.pressure
+        p2 = self.outlet.pressure
+        slope_correction = 0  # TODO slope correction equals 0?
+
+        try:
+            p1 ** 2 - p2 ** 2 - slope_correction
+        except ValueError or TypeError:
+            print(f'p1: {p1}, p2: {p2}')
+        if p1 ** 2 - p2 ** 2 - slope_correction > 0:
+            return 1
+        elif p1 ** 2 - p2 ** 2 - slope_correction < 0:
+            return -1
+        else:
+            raise ValueError('Got condition case 0.')
+
+    def calc_flow_rate(self):
+        """
+        Calculate the volumetric flow rate through the pipe
+        :return: Volumetric flow rate [sm3/s]
+        """
+
+        return - self.inlet.flow
+
+    def calc_gas_mass_flow(self):
+        """
+        Calculate gas mass flow rate through the pipe
+        :return: Mass flow rate [kg/s]
+        """
+        q = self.calc_flow_rate()
+        gas_rho = GasMixture(composition=self.gas_mixture.composition,
+                             pressure=101325,
+                             temperature=288.15).density
+        return q * gas_rho
+
+    def calc_pipe_outlet_temp(self):
+        """
+
+        :return:
+        """
+        # TODO: non-static method
+        return 288.15
