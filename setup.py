@@ -14,8 +14,7 @@ import re
 import subprocess
 import sys
 
-import setuptools
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -70,7 +69,7 @@ def main():
                                    "setuptools",
                                    "requests",
                                    "pyparsing~=3.0.7",
-                                   "cantera~=2.5.1"],
+                                   "cantera~=2.6.0"],
                  classifiers=["Programming Language :: Python :: 3.7",
                               "License :: OSI Approved :: Mozilla Public License 2.0",
                               "Operating System :: OS Independent"],
@@ -78,8 +77,7 @@ def main():
                  project_urls={
                      "Bug Tracker": "https://jugit.fz-juelich.de/iek-10/public/simulation/gasnetsim/-/issues",
                  },
-                 package_dir={"": "GasNetSim"},
-                 packages=setuptools.find_packages(where="GasNetSim"),
+                 packages=find_packages()
                  )
 
 
