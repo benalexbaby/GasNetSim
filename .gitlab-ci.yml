@@ -27,8 +27,6 @@ before_script:
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-
-install:
   - pip install -e .
 
 # run:
