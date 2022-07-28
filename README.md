@@ -32,7 +32,7 @@ The project is released under the terms of the [MPL 2.0](https://mozilla.org/MPL
 - ``setuptools``>=60.9.3
 - ``requests``>=2.25.1
 - ``pyparsing``~=3.0.7
-- ``cantera``~=2.5.1
+- ``cantera``~=2.6.0
 
 For the ``thermo`` package, the version used in this repo is 0.1.40. Because there are some changes 
 and new features included in the newer versions. The source files of the `thermo` package is directly
