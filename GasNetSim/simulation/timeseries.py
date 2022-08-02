@@ -6,14 +6,6 @@
 #     Last change on 7/28/22, 4:19 PM
 #     Last change by yifei
 #    *****************************************************************************
-#  #!/usr/bin/env python
-#  -*- coding: utf-8 -*-
-#  ******************************************************************************
-#    Copyright (c) 2021.
-#    Developed by Yifei Lu
-#    Last change on 7/6/21, 3:35 PM
-#    Last change by yifei
-#   *****************************************************************************
 import pandas as pd
 from pathlib import Path
 import logging
