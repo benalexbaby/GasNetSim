@@ -3,6 +3,7 @@
 [//]: # ([![PyPI]&#40;https://badge.fury.io/py/GasNetSim.svg&#41;]&#40;https://badge.fury.io/py/GasNetSim&#41;)
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+[![DOI:10.1109/OSMSES54027.2022.9769148](https://zenodo.org/badge/DOI/10.1109/OSMSES54027.2022.9769148.svg)](https://doi.org/10.1109/OSMSES54027.2022.9769148)
 
 # **GasNetSim**
 
