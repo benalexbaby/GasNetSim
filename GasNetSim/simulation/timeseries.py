@@ -62,13 +62,14 @@ def not_converged(time_step, ts_variables):
 def update_network_topology(network):
     full_network = copy.deepcopy(network)  # make a copy of the fully connected network
     network_nodes = full_network.nodes
-    network_pipes = full_network.pipes
+    network_pipes = full_network.pipelines
+    network_resistances = full_network.resistances
 
     # Check which nodes need to be removed
     removed_nodes = dict()
     remaining_nodes = dict()
     for i, node in list(network_nodes.items()):
-        if node.demand == 0:
+        if node.flow == 0:
             removed_nodes[i] = node
         else:
             remaining_nodes[i - len(removed_nodes)] = node
@@ -76,7 +77,7 @@ def update_network_topology(network):
     # Check which pipelines need to be removed
     removed_pipes = dict()
     remaining_pipes = dict()
-    for i, pipe in list(network_pipes.items()):
+    for i, pipe in list(network_resistances.items()):
         if (pipe.inlet_index in removed_nodes.keys()) or (pipe.outlet_index in removed_nodes.keys()):
             pipe.valve = 1
         else:
@@ -88,7 +89,7 @@ def update_network_topology(network):
             pipe.outlet_index = list(remaining_nodes.keys())[list(remaining_nodes.values()).index(pipe.outlet)]
             remaining_pipes[i - len(removed_pipes)] = pipe
 
-    return Network(nodes=remaining_nodes, pipes=remaining_pipes)
+    return Network(nodes=remaining_nodes, pipelines=None, resistances=remaining_pipes)
 
 
 def run_time_series(network, file=None):
@@ -107,7 +108,7 @@ def run_time_series(network, file=None):
 
     for t in time_steps:
         for i in full_network.nodes.keys():
-            if i in full_network.p_ref_nodes_index:
+            if i in full_network.reference_nodes:
                 pass
             else:
                 try:
@@ -121,4 +122,4 @@ def run_time_series(network, file=None):
         except RuntimeError:
             error_log.append([simplified_network, profiles.iloc[t]])
 
-    return None
+    return network

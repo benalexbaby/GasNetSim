@@ -29,7 +29,7 @@ class Network:
     Network class
     """
 
-    def __init__(self, nodes: dict, pipelines: dict, compressors=None, resistances=None, shortpipes=None):
+    def __init__(self, nodes: dict, pipelines=None, compressors=None, resistances=None, shortpipes=None):
         """
 
         :param nodes:

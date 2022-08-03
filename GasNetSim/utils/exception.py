@@ -13,5 +13,6 @@ class InitializationError(Exception):
 class FileNameError(Exception):
     pass
 
+
 class ZeroFlowError(Exception):
     pass
