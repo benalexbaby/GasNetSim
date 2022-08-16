@@ -487,7 +487,6 @@ class Network:
                         logging.debug(nodal_gas_inflow_comp[i_node])
 
             j_mat, f_mat = self.jacobian_matrix()
-            j_mat_inv = np.linalg.inv(j_mat)
 
             delta_flow = f - np.dot(f_mat, np.ones(n_nodes))
 
@@ -498,7 +497,7 @@ class Network:
                 n.convert_energy_to_volumetric_flow()
             f = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
-            delta_p = np.dot(j_mat_inv, delta_flow) / 2  # divided by 2
+            delta_p = np.linalg.solve(j_mat, delta_flow) / 2  # divided by 2
             logging.debug(delta_p)
 
             for i in self.non_junction_nodes:
