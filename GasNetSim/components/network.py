@@ -519,16 +519,25 @@ class Network:
 
             n_iter += 1
             j_mat, f_mat = self.jacobian_matrix()
-            delta_flow = f[len(self.reference_nodes):] - np.dot(f_mat, np.ones(n_nodes))[len(self.reference_nodes):]
+            nodal_flow = np.dot(f_mat, np.ones(n_nodes))
+            delta_flow = f - nodal_flow
 
-            logging.debug(max([abs(x) for x in (delta_flow/f[len(self.reference_nodes):])]))
+            delta_flow = np.array([delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes])
+            target_flow = np.array([f[i] for i in range(len(f)) if i + 1 not in self.non_junction_nodes])
+
+            logging.debug(max([abs(x) for x in (delta_flow/target_flow)]))
             logging.debug(delta_p)
 
-            if max([abs(x) for x in (delta_flow/f[len(self.reference_nodes):])]) <= 0.001:
+            if max([abs(x) for x in (delta_flow/target_flow)]) <= 0.001:
                 logger.info(f'Simulation converges in {n_iter} iterations.')
                 logger.info(p)
                 logger.debug(init_p)
                 pipe_h2_fraction = list()
+
+                for i_node in self.non_junction_nodes:
+                    self.nodes[i_node + 1].flow = nodal_flow[i_node]
+
+                # output connection
                 for i_connection, connection in self.connections.items():
                     logger.debug(f'Pipeline index: {i_connection}')
                     logger.debug(f'Pipeline flow rate: {connection.flow_rate}')
