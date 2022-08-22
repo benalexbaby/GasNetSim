@@ -535,7 +535,7 @@ class Network:
                 pipe_h2_fraction = list()
 
                 for i_node in self.non_junction_nodes:
-                    self.nodes[i_node + 1].flow = nodal_flow[i_node]
+                    self.nodes[i_node].flow = nodal_flow[i_node-1]
 
                 # output connection
                 for i_connection, connection in self.connections.items():
