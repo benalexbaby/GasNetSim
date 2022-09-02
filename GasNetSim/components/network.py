@@ -488,7 +488,9 @@ class Network:
 
             j_mat, f_mat = self.jacobian_matrix()
 
-            delta_flow = f - np.dot(f_mat, np.ones(n_nodes))
+            nodal_flow = np.dot(f_mat, np.ones(n_nodes))
+
+            delta_flow = f - nodal_flow
 
             delta_flow = [delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes]
 
@@ -509,7 +511,7 @@ class Network:
 
             for i in self.nodes.keys():
                 if i not in self.reference_nodes:
-                    self.nodes[i].pressure = p[i - 1]
+                    self.nodes[i].pressure = p[i - 1]  # update nodal pressure
 
             for i_connection, connection in self.connections.items():
                 connection.inlet = self.nodes[connection.inlet_index]
@@ -518,11 +520,11 @@ class Network:
             record.append(delta_p)
 
             n_iter += 1
-            j_mat, f_mat = self.jacobian_matrix()
-            nodal_flow = np.dot(f_mat, np.ones(n_nodes))
-            delta_flow = f - nodal_flow
-
-            delta_flow = np.array([delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes])
+            # j_mat, f_mat = self.jacobian_matrix()
+            # nodal_flow = np.dot(f_mat, np.ones(n_nodes))
+            # delta_flow = f - nodal_flow
+            #
+            # delta_flow = np.array([delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes])
             target_flow = np.array([f[i] for i in range(len(f)) if i + 1 not in self.non_junction_nodes])
 
             logging.debug(max([abs(x) for x in (delta_flow/target_flow)]))
