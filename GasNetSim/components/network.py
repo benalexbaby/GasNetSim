@@ -436,7 +436,7 @@ class Network:
             # Calculate nodal inflow gas mixture composition
             nodal_gas_inflow_comp = dict()
             demand_node_supply_pipelines = self.demand_nodes_supply_pipelines
-            for i_node, node in self.nodes.items():
+            for i_node, node in self.nodes.items():  # iterate over all nodes
                 if i_node in self.non_junction_nodes:
                     nodal_gas_inflow_comp[i_node] = node.get_mole_fraction()
                 # elif self.nodes[i_node].flow < 0:  # supply nodes
@@ -451,6 +451,7 @@ class Network:
                     total_inflow_temperature_times_flow_rate = 0
                     for connection in supply_pipelines:
                         connection.gas_mixture = connection.inlet.gas_mixture
+                        # TODO using f_mat to calculate
                         inflow_rate = connection.calc_flow_rate()
                         if inflow_rate > 0:
                             # Sum up flow rate * temperature
@@ -469,6 +470,7 @@ class Network:
                             #     nodal_gas_inflow_comp[i_node] = gas_flow_comp
                             # else:
                             #     nodal_gas_inflow_comp[i_node] = dict(Counter(nodal_gas_inflow_comp[i_node]) + Counter(gas_flow_comp))
+
                     total = sum(total_inflow_comp.values(), 0.0)
                     nodal_gas_inflow_comp[i_node] = {k: v / total for k, v in total_inflow_comp.items()}
                     if total_inflow != 0:
@@ -483,8 +485,8 @@ class Network:
                                                                     temperature=self.nodes[i_node].temperature,
                                                                     pressure=self.nodes[i_node].pressure)
                     except Exception:
-                        logging.debug(i_node)
-                        logging.debug(nodal_gas_inflow_comp[i_node])
+                        logging.warning(i_node)
+                        logging.warning(nodal_gas_inflow_comp[i_node])
 
             j_mat, f_mat = self.jacobian_matrix()
 
@@ -499,7 +501,8 @@ class Network:
                 n.convert_energy_to_volumetric_flow()
             f = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
-            delta_p = np.linalg.solve(j_mat, delta_flow) / 2  # divided by 2
+            delta_p = np.linalg.solve(j_mat, delta_flow) / 2  # np.linalg.solve() uses LU decomposition as defalut
+            delta_p /= 2  # divided by 2 to ensure better convergence
             logging.debug(delta_p)
 
             for i in self.non_junction_nodes:
