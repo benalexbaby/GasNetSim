@@ -90,20 +90,25 @@ class Network:
     #
     #     return pressure_ref_nodes_index, temperature_ref_nodes_index
 
-    @property
     def demand_nodes_supply_pipelines(self):
         """
-
+        Find supply pipelines for the demand nodes
         :return:
         """
         nodal_supply_pipelines = dict()
 
         if self.connections is not None:
             for i_connection, connection in self.connections.items():
-                if nodal_supply_pipelines.get(connection.outlet_index) is not None:
-                    nodal_supply_pipelines[connection.outlet_index].append(i_connection)
-                else:
-                    nodal_supply_pipelines[connection.outlet_index] = [i_connection]
+                if connection.flow_rate is None or connection.flow_rate > 0:
+                    if nodal_supply_pipelines.get(connection.outlet_index) is not None:
+                        nodal_supply_pipelines[connection.outlet_index].append(i_connection)
+                    else:
+                        nodal_supply_pipelines[connection.outlet_index] = [i_connection]
+                elif connection.flow_rate < 0:
+                    if nodal_supply_pipelines.get(connection.inlet_index) is not None:
+                        nodal_supply_pipelines[connection.inlet_index].append(i_connection)
+                    else:
+                        nodal_supply_pipelines[connection.inlet_index] = [i_connection]
 
         return OrderedDict(sorted(nodal_supply_pipelines.items()))
 
@@ -435,7 +440,7 @@ class Network:
 
             # Calculate nodal inflow gas mixture composition
             nodal_gas_inflow_comp = dict()
-            demand_node_supply_pipelines = self.demand_nodes_supply_pipelines
+            demand_node_supply_pipelines = self.demand_nodes_supply_pipelines()
             for i_node, node in self.nodes.items():  # iterate over all nodes
                 if i_node in self.non_junction_nodes:
                     nodal_gas_inflow_comp[i_node] = node.get_mole_fraction()
