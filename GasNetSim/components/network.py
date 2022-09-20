@@ -61,6 +61,15 @@ class Network:
 
         return connections
 
+    def mapping_of_connections(self):
+        n_nodes = len(self.nodes.values())
+        mapping = np.zeros((n_nodes, n_nodes))
+        for i_connection, connection in self.connections.items():
+            i = connection.inlet_index - 1
+            j = connection.outlet_index - 1
+            mapping[i][j] = mapping[j][i] = i_connection
+        return mapping
+
     def find_reference_nodes(self) -> list:
         """
         Find reference nodes, where pressure are pre-set
@@ -437,63 +446,22 @@ class Network:
         record = list()
 
         while n_iter <= max_iter:
+            j_mat, f_mat = self.jacobian_matrix()
+            mapping_connections = self.mapping_of_connections()
+            nodal_gas_inflow_composition, nodal_gas_inflow_temperature = calculate_nodal_inflow_states(self.nodes, self.connections,
+                                          mapping_connections, f_mat)
 
-            # Calculate nodal inflow gas mixture composition
-            nodal_gas_inflow_comp = dict()
-            demand_node_supply_pipelines = self.demand_nodes_supply_pipelines()
-            for i_node, node in self.nodes.items():  # iterate over all nodes
-                if i_node in self.non_junction_nodes:
-                    nodal_gas_inflow_comp[i_node] = node.get_mole_fraction()
-                # elif self.nodes[i_node].flow < 0:  # supply nodes
-                #     nodal_gas_inflow_comp[i_node] = node.get_mole_fraction()
+            for i_node, node in self.nodes.items():
+                if nodal_gas_inflow_composition[i_node] == {}:
+                    pass
                 else:
-                    nodal_gas_inflow_comp[i_node] = 0
-
-                    supply_pipelines = [self.connections[j] for j in demand_node_supply_pipelines[i_node]]
-
-                    total_inflow_comp = dict()
-                    total_inflow = 0
-                    total_inflow_temperature_times_flow_rate = 0
-                    for connection in supply_pipelines:
-                        connection.gas_mixture = connection.inlet.gas_mixture
-                        # TODO using f_mat to calculate
-                        inflow_rate = connection.calc_flow_rate()
-                        if inflow_rate > 0:
-                            # Sum up flow rate * temperature
-                            total_inflow_temperature_times_flow_rate += inflow_rate * connection.calc_pipe_outlet_temp()
-                            total_inflow += inflow_rate
-
-                            gas_comp = connection.gas_mixture.composition
-                            # create a OrderedDict to store gas flow fractions
-                            gas_flow_comp = OrderedDict({gas: comp * inflow_rate for gas, comp in gas_comp.items()})
-                            for gas, comp in gas_flow_comp.items():
-                                if total_inflow_comp.get(gas) is None:
-                                    total_inflow_comp[gas] = comp
-                                else:
-                                    total_inflow_comp[gas] += comp
-                            # if nodal_gas_inflow_comp[i_node] == 0:
-                            #     nodal_gas_inflow_comp[i_node] = gas_flow_comp
-                            # else:
-                            #     nodal_gas_inflow_comp[i_node] = dict(Counter(nodal_gas_inflow_comp[i_node]) + Counter(gas_flow_comp))
-
-                    total = sum(total_inflow_comp.values(), 0.0)
-                    nodal_gas_inflow_comp[i_node] = {k: v / total for k, v in total_inflow_comp.items()}
-                    if total_inflow != 0:
-                        temperature_new = total_inflow_temperature_times_flow_rate / total_inflow
-                        logging.debug(temperature_new)
-
-                        # update node temperature
-                        self.nodes[i_node].temperature = temperature_new
-
                     try:
-                        self.nodes[i_node].gas_mixture = GasMixture(composition=nodal_gas_inflow_comp[i_node],
+                        self.nodes[i_node].gas_mixture = GasMixture(composition=nodal_gas_inflow_composition[i_node],
                                                                     temperature=self.nodes[i_node].temperature,
                                                                     pressure=self.nodes[i_node].pressure)
                     except Exception:
                         logging.warning(i_node)
-                        logging.warning(nodal_gas_inflow_comp[i_node])
-
-            j_mat, f_mat = self.jacobian_matrix()
+                        logging.warning(nodal_gas_inflow_composition[i_node])
 
             nodal_flow = np.dot(f_mat, np.ones(n_nodes))
 
@@ -506,7 +474,7 @@ class Network:
                 n.convert_energy_to_volumetric_flow()
             f = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
-            delta_p = np.linalg.solve(j_mat, delta_flow) / 2  # np.linalg.solve() uses LU decomposition as defalut
+            delta_p = np.linalg.solve(j_mat, delta_flow)  # np.linalg.solve() uses LU decomposition as default
             delta_p /= 2  # divided by 2 to ensure better convergence
             logging.debug(delta_p)
 
