@@ -11,7 +11,7 @@ import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 
-from ..components.pipeline import Pipeline, Resistance
+from ..components.pipeline import Pipeline, Resistance, ShortPipe
 from ..components.node import Node
 from ..components.network import Network
 from ..utils.exception import *
@@ -88,6 +88,23 @@ def read_resistances(path_to_file: Path, network_nodes: dict) -> dict:
     return resistances
 
 
+def read_shortpipes(path_to_file: Path, network_nodes: dict) -> dict:
+    """
+
+    :param path_to_file:
+    :param network_nodes:
+    :return:
+    """
+    shortpipes = dict()
+    df_shortpipes = pd.read_csv(path_to_file, delimiter=';')
+    df_shortpipes = df_shortpipes.replace({np.nan: None})
+
+    for row_index, row in df_shortpipes.iterrows():
+        shortpipes[row['shortpipe_index']] = ShortPipe(inlet=network_nodes[row['inlet_index']],
+                                                       outlet=network_nodes[row['outlet_index']])
+    return shortpipes
+
+
 def create_network_from_csv(path_to_folder: Path) -> Network:
     """
 
@@ -100,7 +117,8 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
     network_components = {'node': nodes,  # the dataset should have at least node
                           'pipeline': None,
                           'compressor': None,
-                          'resistance': None}
+                          'resistance': None,
+                          'shortpipe': None}
 
     for file in all_files:
         file_name = file.stem
@@ -115,10 +133,14 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
         elif 'resistance' in file_name:
             resistances = read_resistances(file, nodes)
             network_components['resistance'] = resistances
+        elif 'shortpipe' in file_name:
+            shortpipes = read_shortpipes(file, nodes)
+            network_components['shortpipe'] = shortpipes
         else:
             raise FileNameError(f'Please check the file name {file_name}.csv')
 
     return Network(nodes=network_components['node'],
                    pipelines=network_components['pipeline'],
                    compressors=network_components['compressor'],
-                   resistances=network_components['resistance'])
+                   resistances=network_components['resistance'],
+                   shortpipes=network_components['shortpipe'])
