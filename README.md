@@ -3,6 +3,7 @@
 [//]: # ([![PyPI]&#40;https://badge.fury.io/py/GasNetSim.svg&#41;]&#40;https://badge.fury.io/py/GasNetSim&#41;)
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+[![DOI:10.1109/OSMSES54027.2022.9769148](https://zenodo.org/badge/DOI/10.1109/OSMSES54027.2022.9769148.svg)](https://doi.org/10.1109/OSMSES54027.2022.9769148)
 
 # **GasNetSim**
 
@@ -32,7 +33,7 @@ The project is released under the terms of the [MPL 2.0](https://mozilla.org/MPL
 - ``setuptools``>=60.9.3
 - ``requests``>=2.25.1
 - ``pyparsing``~=3.0.7
-- ``cantera``~=2.5.1
+- ``cantera``~=2.6.0
 
 For the ``thermo`` package, the version used in this repo is 0.1.40. Because there are some changes 
 and new features included in the newer versions. The source files of the `thermo` package is directly

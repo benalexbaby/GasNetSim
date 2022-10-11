@@ -50,9 +50,9 @@ def calc_heating_value(gas_mixture, heating_value_type='HHV'):
     LHV = -(h2-h1)/Y_fuel
     # Calculate HHV
     water = ct.Water()
-    water.TX = 298, 0  # Set liquid water state, with vapor fraction x = 0
+    water.TQ = 298, 0  # Set liquid water state, with vapor fraction x = 0
     h_liquid = water.h
-    water.TX = 298, 1  # Set gaseous water state, with vapor fraction x = 1
+    water.TQ = 298, 1  # Set gaseous water state, with vapor fraction x = 1
     h_gas = water.h
     HHV = -(h2-h1 + (h_liquid-h_gas) * Y_H2O)/Y_fuel
     if heating_value_type == 'HHV':
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     print('fuel   LHV (MJ/kg)   HHV (MJ/kg)')
     while gas_comp['methane'] > -0.01:
-        gas_mixture = Mixture(P=70 * 101325, T=300, zs=gas_comp)
+        gas_mixture = GasMixture(P=70 * 101325, T=300, zs=gas_comp)
         standard_density = Mixture(P=101325, T=288.15, zs=gas_comp).rho
         gas_comp['methane'] -= 0.01
         gas_comp['hydrogen'] += 0.01
