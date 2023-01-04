@@ -48,8 +48,8 @@ def check_profiles(profiles):
         # df['time'] = df['time'].apply(lambda x: pd.Timestamp.now() + pd.Timedelta(seconds=x))
 
 
-def run_snapshot(network):
-    network = network.simulation()
+def run_snapshot(network, composition_tracking=False):
+    network = network.simulation(composition_tracking)
     return network
 
 
@@ -92,7 +92,7 @@ def update_network_topology(network):
     return Network(nodes=remaining_nodes, pipelines=None, resistances=remaining_pipes)
 
 
-def run_time_series(network, file=None):
+def run_time_series(network, file=None, composition_tracking=False):
     # create a copy of the input network
     full_network = copy.deepcopy(network)
 
@@ -118,7 +118,7 @@ def run_time_series(network, file=None):
                     pass
         simplified_network = update_network_topology(full_network)
         try:
-            network = run_snapshot(simplified_network)
+            network = run_snapshot(simplified_network, composition_tracking)
         except RuntimeError:
             error_log.append([simplified_network, profiles.iloc[t]])
 

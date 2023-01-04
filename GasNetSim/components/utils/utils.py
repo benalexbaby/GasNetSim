@@ -70,23 +70,34 @@ def delete_matrix_rows_and_columns(matrix, to_remove):
     return new_matrix
 
 
-def gas_mixture_transportation(connection, inlet_index, outlet_index,
-                               time_step, composition, location):
+def gas_mixture_transportation(connection, time_step):
+    composition_history = connection.composition_history
+    batch_location_history = connection.batch_location_history
     length = connection.length
     velocity = connection.flow_velocity
-    outlet_composition = connection.outlet_composition
+    if velocity is None:
+        velocity = 0
+    if velocity >= 0:
+        outlet_composition = connection.outlet.gas_mixture.composition
+    else:
+        outlet_composition = connection.inlet.gas_mixture.composition
 
-    while location[0] >= length:  # if the head of a batch reached the end of the pipeline
-        outlet_composition = composition[0]
-        composition, location = composition[1:], location[1:]
+    while batch_location_history[0] >= length:  # if the head of a batch reached the end of the pipeline
+        outlet_composition = composition_history[0]
+        composition_history, batch_location_history = composition_history[1:], batch_location_history[1:]
 
-    location = np.append(location, 0)
-    composition = np.append(composition, connection.inlet.gas_mixture.composition)
-    location += time_step * velocity
-    return outlet_composition, location, composition
+    batch_location_history = np.append(batch_location_history, 0)
+    composition_history = np.append(composition_history, connection.inlet.gas_mixture.composition)
+    batch_location_history += time_step * velocity
+
+    # update connection composition and batch location history
+    connection.composition_history = composition_history
+    connection.batch_location_history = batch_location_history
+    return outlet_composition, connection
 
 
-def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_matrix, composition_tracking=False):
+def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_matrix, composition_tracking=False,
+                                  time_step=0):
     nodal_total_inflow = np.sum(np.where(flow_matrix > 0, flow_matrix, 0), axis=1)
 
     nodal_gas_inflow_composition = dict()
@@ -106,7 +117,7 @@ def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_
         for inlet_index in inflow_from_node:
             connection = connections[mapping_connections[i_node - 1][inlet_index - 1]]
             if composition_tracking:
-                gas_composition, location, composition = connection.gas_mixture_transportation()
+                gas_composition, connection = gas_mixture_transportation(connection, time_step=time_step)
             else:
                 gas_composition = nodes[inlet_index].gas_mixture.composition
             connection.gas_mixture.composition = gas_composition

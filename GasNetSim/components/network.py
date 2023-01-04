@@ -402,7 +402,7 @@ class Network:
     def calculate_nodal_inflow_composition(self):
         pass
 
-    def simulation(self):
+    def simulation(self, composition_tracking=False):
         logging.debug([x.flow for x in self.nodes.values()])
         # ref_nodes = self.p_ref_nodes_index
 
@@ -448,8 +448,9 @@ class Network:
         while n_iter <= max_iter:
             j_mat, f_mat = self.jacobian_matrix()
             mapping_connections = self.mapping_of_connections()
-            nodal_gas_inflow_composition, nodal_gas_inflow_temperature = calculate_nodal_inflow_states(self.nodes, self.connections,
-                                          mapping_connections, f_mat)
+            nodal_gas_inflow_composition, nodal_gas_inflow_temperature = \
+                calculate_nodal_inflow_states(self.nodes, self.connections, mapping_connections, f_mat,
+                                              composition_tracking=composition_tracking)
 
             for i_node, node in self.nodes.items():
                 if nodal_gas_inflow_composition[i_node] == {}:
