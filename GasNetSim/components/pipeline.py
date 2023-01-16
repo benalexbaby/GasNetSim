@@ -265,12 +265,22 @@ class Pipeline:
         qm = self.calc_gas_mass_flow()
         friction = self.calculate_pipe_friction_factor()
         if qm is not None and friction is not None and self.gas_mixture.heat_capacity_constant_pressure is not None:
-            beta = calc_beta(ul=3.69, qm=qm, cp=self.gas_mixture.heat_capacity_constant_pressure, d=self.diameter)
-            gamma = calc_gamma(mu_jt=self.gas_mixture.joule_thomson_coefficient,
-                               z=self.gas_mixture.compressibility,
-                               R=self.gas_mixture.R_specific,
-                               f=friction, qm=qm, p_a=self.calc_average_pressure(), D=self.diameter)
-            return outlet_temp(beta=beta, gamma=gamma, Ts=self.ambient_temp, L=self.length, T1=self.inlet.temperature)
+            beta = calculate_beta_coefficient(ul=3.69,
+                                              qm=qm,
+                                              cp=self.gas_mixture.heat_capacity_constant_pressure,
+                                              D=self.diameter)
+            gamma = calculate_gamma_coefficient(mu_jt=self.gas_mixture.joule_thomson_coefficient,
+                                                Z=self.gas_mixture.compressibility,
+                                                R_specific=self.gas_mixture.R_specific,
+                                                f=friction,
+                                                qm=qm,
+                                                p_avg=self.calc_average_pressure(),
+                                                D=self.diameter)
+            return calculate_pipeline_outlet_temperature(beta=beta,
+                                                         gamma=gamma,
+                                                         Ts=self.ambient_temp,
+                                                         L=self.length,
+                                                         T1=self.inlet.temperature)
         else:
             return self.ambient_temp
 
