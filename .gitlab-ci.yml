@@ -33,6 +33,7 @@ run:
   script:
   - pip install -e .
     # run the command here
+  - pytest -v
   artifacts:
     paths:
       - dist/*.whl
