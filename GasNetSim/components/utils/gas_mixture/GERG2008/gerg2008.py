@@ -473,20 +473,20 @@ class GasMixtureGERG2008:
                     em = 1 / ep
                     hsn = (ep - em) / 2
                     hcn = (ep + em) / 2
-                if j == 4 or j == 6:
-                    LogHyp = math.log(abs(hsn))
-                    SumHyp0 = SumHyp0 + n0i[i][j] * LogHyp
-                    SumHyp1 = SumHyp1 + n0i[i][j] * th0T * hcn / hsn
-                    SumHyp2 = SumHyp2 + n0i[i][j] * (th0T / hsn) * (th0T / hsn)
-                else:
-                    LogHyp = math.log(abs(hcn))
-                    SumHyp0 = SumHyp0 - n0i[i][j] * LogHyp
-                    SumHyp1 = SumHyp1 - n0i[i][j] * th0T * hsn / hcn
-                    SumHyp2 = SumHyp2 + n0i[i][j] * (th0T / hcn) * (th0T / hcn)
+                    if j == 4 or j == 6:
+                        LogHyp = math.log(abs(hsn))
+                        SumHyp0 = SumHyp0 + n0i[i][j] * LogHyp
+                        SumHyp1 = SumHyp1 + n0i[i][j] * th0T * hcn / hsn
+                        SumHyp2 = SumHyp2 + n0i[i][j] * (th0T / hsn) * (th0T / hsn)
+                    else:
+                        LogHyp = math.log(abs(hcn))
+                        SumHyp0 = SumHyp0 - n0i[i][j] * LogHyp
+                        SumHyp1 = SumHyp1 - n0i[i][j] * th0T * hsn / hcn
+                        SumHyp2 = SumHyp2 + n0i[i][j] * (th0T / hcn) * (th0T / hcn)
 
-                a0[0] += +x[i] * (LogxD + n0i[i][1] + n0i[i][2] / T - n0i[i][3] * LogT + SumHyp0)
-                a0[1] += +x[i] * (n0i[i][3] + n0i[i][2] / T + SumHyp1)
-                a0[2] += -x[i] * (n0i[i][3] + SumHyp2)
+            a0[0] += +x[i] * (LogxD + n0i[i][1] + n0i[i][2] / T - n0i[i][3] * LogT + SumHyp0)
+            a0[1] += +x[i] * (n0i[i][3] + n0i[i][2] / T + SumHyp1)
+            a0[2] += -x[i] * (n0i[i][3] + SumHyp2)
         return a0
 
     # The following routines are low-level routines that should not be called outside of this code.
