@@ -143,6 +143,9 @@ The compositions in the x() array use the following order and must be sent as mo
 class GasMixtureGERG2008:
     def __init__(self, P, T, composition, pressure_unit='Pa', temperature_unit='K'):
         # Input parameters
+        self.dPdT = None
+        self.d2PdD2 = None
+        self.dPdD = None
         if pressure_unit == 'Pa':
             self.P = P / 1000  # Pa -> kPa
         elif pressure_unit == 'kPa':
