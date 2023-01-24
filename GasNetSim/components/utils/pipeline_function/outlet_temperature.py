@@ -8,9 +8,6 @@
 #   *****************************************************************************
 import math
 
-from GasNetSim.components.utils.gas_mixture.thermo.thermo import Mixture
-
-
 def calculate_beta_coefficient(ul, qm, cp, D):
     """
 
@@ -60,6 +57,9 @@ if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.constants import bar, R
+
+    # from GasNetSim.components.utils.gas_mixture.thermo.thermo import Mixture
+    from thermo import Mixture
 
     gas_mixture = Mixture(T=300, P=50 * bar, zs={"methane": 0.9, "hydrogen": 0.1})
     heat_transfer_coefficient = 3.69 * 10

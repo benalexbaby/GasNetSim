@@ -9,8 +9,8 @@
 from collections import OrderedDict
 import logging
 
-from .thermo.thermo import Mixture
-# from thermo import Mixture
+# from .thermo.thermo import Mixture
+from thermo import Mixture
 
 
 class GasMixture:

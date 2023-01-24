@@ -13,7 +13,6 @@ from .node import *
 from .utils.pipeline_function.friction_factor import *
 from .utils.pipeline_function.outlet_temperature import *
 from .utils.gas_mixture.gas_mixture import *
-# from thermo import Mixture
 
 
 STANDARD_TEMPERATURE = 288.15
