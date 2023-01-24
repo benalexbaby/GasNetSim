@@ -145,20 +145,14 @@ The compositions in the x() array use the following order and must be sent as mo
 
 
 class GasMixtureGERG2008:
-    def __init__(self, P, T, composition, pressure_unit='Pa', temperature_unit='K'):
+    def __init__(self, P_Pa, T_K, composition):
         # Input parameters
         self.dPdT = None
         self.d2PdD2 = None
         self.dPdD = None
-        if pressure_unit == 'Pa':
-            self.P = P / 1000  # Pa -> kPa
-        elif pressure_unit == 'kPa':
-            self.P = P
-        elif pressure_unit == 'bar':
-            self.P = 101.325 * P  # bar -> kPa
-        else:
-            raise ValueError("Pressure unit is not known!")
-        self.T = T
+        self.P = P_Pa / 1000  # Pa -> kPa
+
+        self.T = T_K
         self.x = self.CovertCompositionGERG(composition=composition)  # gas composition
 
         # Calculated properties
@@ -178,6 +172,9 @@ class GasMixtureGERG2008:
 
         self.JT = 1  # Joule-Thomson coefficient [K/kPa]
         self.isentropic_exponent = 0  # Isentropic exponent
+
+        self.R_specific = 0
+        self.viscosity = 2e-4  # TODO add function
 
         self.PropertiesGERG()
 
@@ -573,10 +570,11 @@ class GasMixtureGERG2008:
         self.Cp = Cp
         self.c = W  # speed of sound [m/s]
         self.gibbs_energy = G  # Gibbs energy [J/mol]
-        self.JT = JT  # Joule-Thomson coefficient [K/kPa]
+        self.JT = JT / 1e3 # Joule-Thomson coefficient [K/kPa]
         self.isentropic_exponent = Kappa  # Isentropic exponent
-        self.rho = 0
-        self.SG = 1
+        self.rho = self.MolarMass * self.P * 1000 / RT
+        self.SG = self.MolarMass / air_molar_mass
+        self.R_specific = R / self.MolarMass
 
     def Alpha0GERG(self):
         """
