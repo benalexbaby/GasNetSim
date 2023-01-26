@@ -95,7 +95,6 @@ def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_
 
             # Sum up flow rate * temperature
             total_inflow_temperature_times_flow_rate += inflow_rate * inflow_temperature
-            total_inflow += inflow_rate
 
             # create a OrderedDict to store gas flow fractions
             gas_flow_comp = OrderedDict({gas: comp * inflow_rate for gas, comp in gas_composition.items()})
