@@ -262,7 +262,7 @@ class Pipeline:
         Calculate pipe outlet temperature based on the physical law of flow temperature loss
         :return: Pipe outlet temperature
         """
-        qm = self.calc_gas_mass_flow()
+        qm = abs(self.calc_gas_mass_flow())
         friction = self.calculate_pipe_friction_factor()
         if qm is not None and friction is not None and self.gas_mixture.heat_capacity_constant_pressure is not None:
             beta = calculate_beta_coefficient(ul=3.69,
