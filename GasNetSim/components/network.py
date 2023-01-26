@@ -12,6 +12,8 @@ from typing import Tuple
 from scipy import sparse
 import logging
 import copy
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import OrderedDict
 
 from .utils.gas_mixture.heating_value import *
@@ -60,6 +62,17 @@ class Network:
                     i_connection += 1
 
         return connections
+
+    def plot_pipeline_length_distribution(self):
+        lines = self.pipelines.values()
+        pipe_lengths = list()
+        for l in lines:
+            pipe_lengths.append(l.length / 1000)
+        sns.histplot(data=pipe_lengths, stat="probability")
+        plt.xlim((-2, max(pipe_lengths) + 10))
+        plt.xlabel("Pipe length [km]")
+        plt.show()
+        return None
 
     def mapping_of_connections(self):
         n_nodes = len(self.nodes.values())
