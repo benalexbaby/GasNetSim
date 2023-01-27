@@ -256,26 +256,38 @@ class GasMixtureGERG2008:
                               # 'O': 249190.0,
                               # 'SO2': -296840.0}
 
+        # # reactants
+        # atom_list = []
+        # new_dict = {}
+        #
+        # for key, value in comp.items():
+        #     for key1, value1 in dict_components.items():
+        #         if key == key1:
+        #             new_dict = dict_components.get(key1, {})
+        #             new_dict.update((x, y * value) for x, y in new_dict.items())
+        #             atom_list.append(new_dict)
+        #
+        # # counter_reactants = Counter()
+        # reactants_dict = Counter()
+        # for d in atom_list:
+        #     reactants_dict.update(d)
+
         # reactants
         atom_list = []
-        new_dict = {}
 
         for key, value in comp.items():
             for key1, value1 in dict_components.items():
                 if key == key1:
-                    new_dict = dict_components.get(key1, {})
-                    new_dict.update((x, y * value) for x, y in new_dict.items())
-                    atom_list.append(new_dict)
+                    atom_list.append(dict((x, y * value) for x, y in dict_components.get(key1, {}).items()))
 
-        # counter_reactants = Counter()
-        reactants_dict = Counter()
+        reactants_atom = Counter()
         for d in atom_list:
-            reactants_dict.update(d)
+            reactants_atom.update(d)
 
         # products
-        n_CO2 = reactants_dict["C"]
-        n_SO2 = reactants_dict["S"]
-        n_H2O = reactants_dict["H"] / 2
+        n_CO2 = reactants_atom["C"]
+        n_SO2 = reactants_atom["S"]
+        n_H2O = reactants_atom["H"] / 2
         products_dict = {'carbon dioxide': n_CO2, 'sulfur dioxide': n_SO2, 'water': n_H2O}
 
         # oxygen for complete combustion
@@ -295,12 +307,12 @@ class GasMixtureGERG2008:
                     LHV -= value * value2
 
         # 298 K
-        # hw_liq = -285825.0
-        # hw_gas = -241820.0
+        hw_liq = -285825.0
+        hw_gas = -241820.0
 
         # 273 K
-        hw_liq = -287654.96084928664
-        hw_gas = -242628.01574091613
+        # hw_liq = -287654.96084928664
+        # hw_gas = -242628.01574091613
 
         HHV = LHV + (hw_gas - hw_liq) * products_dict["water"]
 
