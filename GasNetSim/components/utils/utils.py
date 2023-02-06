@@ -70,6 +70,10 @@ def delete_matrix_rows_and_columns(matrix, to_remove):
     return new_matrix
 
 
+def jacobian_matrix_condition_number(matrix):
+    print(f"The condition number of the matrix is {np.linalg.cond(matrix)}.")
+
+
 def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_matrix):
     nodal_total_inflow = np.sum(np.where(flow_matrix > 0, flow_matrix, 0), axis=1)
 
