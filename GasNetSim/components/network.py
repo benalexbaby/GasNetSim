@@ -356,8 +356,8 @@ class Network:
 
         n_junction_nodes = len(self.junction_nodes)
 
-        jacobian_mat = np.zeros((n_nodes, n_nodes), dtype=np.float)
-        flow_mat = np.zeros((n_nodes, n_nodes), dtype=np.float)
+        jacobian_mat = np.zeros((n_nodes, n_nodes), dtype=float)
+        flow_mat = np.zeros((n_nodes, n_nodes), dtype=float)
 
         for connection in connections.values():
             i = connection.inlet_index - 1
