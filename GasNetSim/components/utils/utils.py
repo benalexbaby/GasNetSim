@@ -74,6 +74,12 @@ def jacobian_matrix_condition_number(matrix):
     print(f"The condition number of the matrix is {np.linalg.cond(matrix)}.")
 
 
+def print_n_largest_absolute_values(n, values):
+    sorted_values = sorted([abs(x) for x in values])
+    print(sorted_values[-n::-1])
+    return None
+
+
 def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_matrix):
     nodal_total_inflow = np.sum(np.where(flow_matrix > 0, flow_matrix, 0), axis=1)
 
