@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Test for pipeline outlet temperature calculation function
+- Test and validation with original [C++ implementation](https://github.com/usnistgov/AGA8/tree/master/AGA8CODE/C) of GERG-2008 EOS
 
 ### Changed
 - Fixed pipeline outlet temperature calculation
+- Fixed GERG-2008 implementation
+- Set default gas mixture EOS for simulation to GERG-2008
 
 ### Removed
+- Local adapted implementation of _thermo_ package
