@@ -1,7 +1,7 @@
 node_index;pressure_pa;flow_sm3_per_s;altitude_m;temperature_k;gas_composition;node_type;flow_type;longitude; latitude; remarks
-1;7194075;;130;300;;reference;;;;
-2;7194075;;60;300;;reference;;;;
-3;7194075;;60;300;;reference;;;;
+1;7000000;;130;300;;reference;;;;
+2;7000000;;60;300;;reference;;;;
+3;7000000;;60;300;;reference;;;;
 4;;40;40;;;;volumetric;;;
 5;;30;30;;;;volumetric;;;
 6;;10;60;;;;volumetric;;;
