@@ -5,7 +5,7 @@ import pandas as pd
 import math
 import matplotlib.pyplot as plt
 
-from GERG2008.gerg2008 import *
+from GasNetSim.components.utils.gas_mixture.GERG2008.gerg2008 import *
 import cantera as ct
 
 def heating_value(fuel):
