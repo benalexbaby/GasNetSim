@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added support of heating value calculation for GERG2008 gas mixture class
+- Tests and validations for the implementation of the heating values calculation
+- Tests and validations of gas mixture properties calculation using the _thermo_ package and the GERG-2008 EOS
 
 ### Changed
 
