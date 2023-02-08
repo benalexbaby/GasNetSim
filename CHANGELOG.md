@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Test for pipeline outlet temperature calculation function
 
 ### Changed
+- Fixed pipeline outlet temperature calculation
 
 ### Removed
