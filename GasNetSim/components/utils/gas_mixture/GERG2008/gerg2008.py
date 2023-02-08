@@ -170,7 +170,7 @@ class GasMixtureGERG2008:
         self.c = 0  # speed of sound [m/s]
         self.gibbs_energy = 0  # Gibbs energy [J/mol]
 
-        self.JT = 1  # Joule-Thomson coefficient [K/kPa]
+        self.JT = 1  # Joule-Thomson coefficient [K/Pa]
         self.isentropic_exponent = 0  # Isentropic exponent
 
         self.R_specific = 0
@@ -519,7 +519,7 @@ class GasMixtureGERG2008:
                     Cp - Isobaric heat capacity [J/(mol-K)]
                      W - Speed of sound (m/s)
                      G - Gibbs energy (J/mol)
-                    JT - Joule-Thomson coefficient (K/kPa)
+                    JT - Joule-Thomson coefficient (K/Pa)
                  Kappa - Isentropic Exponent
                      A - Helmholtz energy (J/mol)
         """
@@ -582,7 +582,7 @@ class GasMixtureGERG2008:
         self.Cp = Cp
         self.c = W  # speed of sound [m/s]
         self.gibbs_energy = G  # Gibbs energy [J/mol]
-        self.JT = JT / 1e3 # Joule-Thomson coefficient [K/kPa]
+        self.JT = JT / 1e3  # Joule-Thomson coefficient [K/Pa]
         self.isentropic_exponent = Kappa  # Isentropic exponent
         self.rho = self.MolarMass * self.P * 1000 / RT
         self.SG = self.MolarMass / air_molar_mass

@@ -71,7 +71,7 @@ def test_gerg_function_with_original_cpp_implementation():
                   "Isobaric heat capacity [J/mol-K]": Cp,
                   "Speed of sound [m/s]": W,
                   "Gibbs energy [J/mol]": G,
-                  "Joule-Thomson coefficient [K/kPa]": JT,
+                  "Joule-Thomson coefficient [K/kPa]": JT*1e3,
                   "Isentropic exponent": Kappa}
 
     assert_almost_equal(nist_results["Molar mass [g/mol]"], my_results["Molar mass [g/mol]"])
