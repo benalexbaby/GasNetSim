@@ -496,8 +496,6 @@ class Network:
 
             p += delta_p  # update nodal pressure list
 
-            # TODO Newton-Raphson with Jacobian adjustment
-
             for i in self.nodes.keys():
                 if i not in self.reference_nodes:
                     self.nodes[i].pressure = p[i - 1]  # update nodal pressure
