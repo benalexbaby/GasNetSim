@@ -415,7 +415,7 @@ class Network:
     def calculate_nodal_inflow_composition(self):
         pass
 
-    def simulation(self):
+    def simulation(self, max_iter=100):
         logging.debug([x.flow for x in self.nodes.values()])
         # ref_nodes = self.p_ref_nodes_index
 
@@ -425,7 +425,6 @@ class Network:
 
         init_f, init_p, init_t = self.newton_raphson_initialization()
 
-        max_iter = 100
         n_iter = 0
         # n_non_ref_nodes = n_nodes - len(ref_nodes)
 
