@@ -415,7 +415,31 @@ class Network:
     def calculate_nodal_inflow_composition(self):
         pass
 
-    def simulation(self, max_iter=100):
+    def update_node_parameters(self, pressure, flow, temperature):
+        for i in range(len(flow)):
+            # TODO change to number of non-reference nodes
+            self.nodes[i + 1].pressure = pressure[i]
+            self.nodes[i + 1].flow = flow[i]
+            self.nodes[i + 1].temperature = temperature[i]
+            self.nodes[i + 1].update_gas_mixture()
+
+    def update_pipeline_parameters(self):
+        for index, pipe in self.pipelines.items():
+            pipe.inlet = self.nodes[pipe.inlet_index]
+            pipe.outlet = self.nodes[pipe.outlet_index]
+            pipe.update_gas_mixture()
+
+    def update_resistance_parameters(self):
+        for index, r in self.resistances.items():
+            r.inlet = self.nodes[r.inlet_index]
+            r.outlet = self.nodes[r.outlet_index]
+            r.update_gas_mixture()
+
+    def update_connection_flow_rate(self):
+        for connection in self.connections.values():
+            connection.flow_rate = connection.calc_flow_rate()
+
+    def simulation(self, max_iter=100, tol=0.001):
         logging.debug([x.flow for x in self.nodes.values()])
         # ref_nodes = self.p_ref_nodes_index
 
@@ -428,41 +452,31 @@ class Network:
         n_iter = 0
         # n_non_ref_nodes = n_nodes - len(ref_nodes)
 
-        f = np.array(init_f)
+        f_target = np.array(init_f)
         p = np.array(init_p)
         t = np.array(init_t)
         logging.info(f'Initial pressure: {p}')
-        logging.info(f'Initial flow: {f}')
+        logging.info(f'Initial flow: {f_target}')
 
-        for i in range(len(init_f)):
-            # TODO change to number of non-reference nodes
-            self.nodes[i + 1].pressure = init_p[i]
-            self.nodes[i + 1].flow = init_f[i]
-            self.nodes[i + 1].temperature = init_t[i]
-            self.nodes[i + 1].update_gas_mixture()
-
+        self.update_node_parameters(pressure=p, flow=f_target, temperature=t)
         if self.pipelines is not None:
-            for index, pipe in self.pipelines.items():
-                pipe.inlet = self.nodes[pipe.inlet_index]
-                pipe.outlet = self.nodes[pipe.outlet_index]
-                pipe.update_gas_mixture()
-
+            self.update_pipeline_parameters()
         if self.resistances is not None:
-            for index, r in self.resistances.items():
-                r.inlet = self.nodes[r.inlet_index]
-                r.outlet = self.nodes[r.outlet_index]
-                r.update_gas_mixture()
+            self.update_resistance_parameters()
 
         delta_flow = 0
 
         record = list()
 
-        while n_iter <= max_iter:
+        err = tol + 1  # ensure the first loop will be executed
+
+        while err > tol:
             j_mat, f_mat = self.jacobian_matrix()
             mapping_connections = self.mapping_of_connections()
-            nodal_gas_inflow_composition, nodal_gas_inflow_temperature = calculate_nodal_inflow_states(self.nodes, self.connections,
-                                          mapping_connections, f_mat)
-
+            inflow_xi, inflow_temp = calculate_nodal_inflow_states(self.nodes, self.connections,
+                                                                   mapping_connections, f_mat)
+            nodal_gas_inflow_composition = inflow_xi
+            nodal_gas_inflow_temperature = inflow_temp
             for i_node, node in self.nodes.items():
                 if nodal_gas_inflow_composition[i_node] == {}:
                     pass
@@ -477,14 +491,14 @@ class Network:
 
             nodal_flow = np.dot(f_mat, np.ones(n_nodes))
 
-            delta_flow = f - nodal_flow
+            delta_flow = f_target - nodal_flow
 
             delta_flow = [delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes]
 
             # Update volumetric flow rate target
             for n in self.nodes.values():
                 n.convert_energy_to_volumetric_flow()
-            f = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
+            f_target = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
             delta_p = np.linalg.solve(j_mat, delta_flow)  # np.linalg.solve() uses LU decomposition as default
             delta_p /= 2  # divided by 2 to ensure better convergence
@@ -506,38 +520,33 @@ class Network:
             record.append(delta_p)
 
             n_iter += 1
-            # j_mat, f_mat = self.jacobian_matrix()
-            # nodal_flow = np.dot(f_mat, np.ones(n_nodes))
-            # delta_flow = f - nodal_flow
-            #
-            # delta_flow = np.array([delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in self.non_junction_nodes])
-            target_flow = np.array([f[i] for i in range(len(f)) if i + 1 not in self.non_junction_nodes])
+
+            target_flow = np.array([f_target[i] for i in range(len(f_target)) if i + 1 not in self.non_junction_nodes])
+            err = max([abs(x) for x in (delta_flow/target_flow)])
 
             logging.debug(max([abs(x) for x in (delta_flow/target_flow)]))
             logging.debug(delta_p)
 
-            if max([abs(x) for x in (delta_flow/target_flow)]) <= 0.001:
-                logger.info(f'Simulation converges in {n_iter} iterations.')
-                logger.info(p)
-                logger.debug(init_p)
-                pipe_h2_fraction = list()
-
-                for i_node in self.non_junction_nodes:
-                    self.nodes[i_node].flow = nodal_flow[i_node-1]
-
-                # output connection
-                for i_connection, connection in self.connections.items():
-                    logger.debug(f'Pipeline index: {i_connection}')
-                    logger.debug(f'Pipeline flow rate: {connection.flow_rate}')
-                    logger.debug(f'Gas mixture composition: {connection.gas_mixture.composition}')
-                    try:
-                        pipe_h2_fraction.append(connection.gas_mixture.composition['hydrogen'] * 100)
-                    except KeyError:
-                        pipe_h2_fraction.append(0)
-                logging.debug(pipe_h2_fraction)
-                for connection in self.connections.values():
-                    connection.flow_rate = connection.calc_flow_rate()
-                return self
-
+            # simulation does not converge
             if n_iter >= max_iter:
                 raise RuntimeError(f'Simulation not converged in {max_iter} iteration(s)!')
+
+        logger.info(f'Simulation converges in {n_iter} iterations.')
+        logger.info(p)
+        # pipe_h2_fraction = list()
+
+        for i_node in self.non_junction_nodes:
+            self.nodes[i_node].flow = nodal_flow[i_node - 1]
+
+        # output connection
+        for i_connection, connection in self.connections.items():
+            logger.debug(f'Pipeline index: {i_connection}')
+            logger.debug(f'Pipeline flow rate: {connection.flow_rate}')
+            logger.debug(f'Gas mixture composition: {connection.gas_mixture.composition}')
+            # try:
+            #     pipe_h2_fraction.append(connection.gas_mixture.composition['hydrogen'] * 100)
+            # except KeyError:
+            #     pipe_h2_fraction.append(0)
+        # logging.debug(pipe_h2_fraction)
+        self.update_connection_flow_rate()
+        return self
