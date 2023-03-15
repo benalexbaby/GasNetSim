@@ -116,6 +116,34 @@ def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_
 
         nodal_gas_inflow_composition[i_node] = {k: v / total_inflow for k, v in total_inflow_comp.items()}
 
-        nodal_gas_inflow_temperature[i_node] = total_inflow_temperature_times_flow_rate / total_inflow
+        if total_inflow != .0:
+            nodal_gas_inflow_temperature[i_node] = total_inflow_temperature_times_flow_rate / total_inflow
+        else:
+            nodal_gas_inflow_temperature[i_node] = np.nan
 
     return nodal_gas_inflow_composition, nodal_gas_inflow_temperature
+
+
+def calculate_flow_matrix(pressure, network):
+    connections = network.connections
+    nodes = network.nodes
+    n_nodes = len(nodes)
+    flow_mat = np.zeros((n_nodes, n_nodes), dtype=float)
+
+    for connection in connections.values():
+        i = connection.inlet_index - 1
+        j = connection.outlet_index - 1
+
+        flow_direction = connection.determine_flow_direction()
+        p1 = pressure[i]
+        p2 = pressure[j]
+
+        slope_correction = connection.calc_pipe_slope_correction()
+        temp = connection.calculate_coefficient_for_iteration()
+
+        flow_rate = flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * temp
+
+        flow_mat[i][j] = - flow_rate
+        flow_mat[j][i] = flow_rate
+
+    return flow_mat
