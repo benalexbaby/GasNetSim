@@ -8,6 +8,7 @@
 #    *****************************************************************************
 import logging
 import math
+from scipy.constants import atm, zero_Celsius
 
 from .node import *
 from .utils.pipeline_function.friction_factor import *
@@ -15,8 +16,8 @@ from .utils.pipeline_function.outlet_temperature import *
 from .utils.gas_mixture.gas_mixture import *
 
 
-STANDARD_TEMPERATURE = 288.15
-STANDARD_PRESSURE = 101325
+STANDARD_TEMPERATURE = zero_Celsius + 15  # 15 degree Celsius in Kelvin
+STANDARD_PRESSURE = 1 * atm  # 1 atm in pa
 
 
 class Pipeline:
