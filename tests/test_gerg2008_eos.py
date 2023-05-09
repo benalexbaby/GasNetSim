@@ -50,8 +50,8 @@ def test_gerg_function_with_original_cpp_implementation():
     U = gas_mixture.energy
     H = gas_mixture.enthalpy
     S = gas_mixture.entropy
-    Cv = gas_mixture.Cv
-    Cp = gas_mixture.Cp
+    Cv = gas_mixture.Cv_molar
+    Cp = gas_mixture.Cp_molar
     W = gas_mixture.c
     G = gas_mixture.gibbs_energy
     JT = gas_mixture.JT
