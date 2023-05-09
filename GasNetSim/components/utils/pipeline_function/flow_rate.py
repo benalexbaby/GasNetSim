@@ -19,10 +19,10 @@ FLOW_EQUATION_CONSTANT = math.pi * math.sqrt(R/16./MOLAR_MASS_AIR*1000)
 def calculate_pipeline_average_temperature(t_ambient, t1, t2):
     """
 
-    :param t_ambient:
-    :param t1:
-    :param t2:
-    :return:
+    :param t_ambient: Ambient temperature
+    :param t1: Inlet temperature
+    :param t2: Outlet temperature
+    :return: Pipeline average temperature
     """
     if t1 == t_ambient or t2 == t_ambient or t1 == t2:
         return t1
