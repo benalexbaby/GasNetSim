@@ -142,7 +142,7 @@ class Pipeline:
         """
         # Friction factor models implemented in this tool, if not available, add new methods/models in the
         # friction_factor.py file
-        implemented_methods = ['weymouth', 'chen', 'nikuradse', 'colebrook-white']
+        implemented_methods = ['weymouth', 'chen', 'nikuradse', 'colebrook-white', 'hagen-poiseuille']
 
         method = self.friction_factor_method
 
@@ -160,6 +160,8 @@ class Pipeline:
             return nikuradse(d=self.diameter, epsilon=self.roughness)
         elif method == 'colebrook-white':
             return colebrook_white(epsilon=self.roughness, d=self.diameter, N_re=self.calculate_reynolds_number())
+        elif method == "hagen-poiseuille":
+            hagen_poiseuille(N_re=self.calculate_reynolds_number())
 
     def calculate_fictitious_resistance(self):
         tb = STANDARD_TEMPERATURE
