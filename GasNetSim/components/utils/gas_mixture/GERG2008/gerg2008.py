@@ -176,6 +176,8 @@ class GasMixtureGERG2008:
         self.R_specific = 0
         self.viscosity = 2e-4  # TODO add function
 
+        self.HHV = self.CalculateHeatingValue(comp=composition, hhv=True, parameter="volume")
+
         self.PropertiesGERG()
 
     def CalculateHeatingValue(self, comp, hhv, parameter):
