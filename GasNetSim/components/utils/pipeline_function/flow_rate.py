@@ -9,6 +9,11 @@
 import math
 import logging
 from GasNetSim.utils.exception import ZeroFlowError
+from scipy.constants import atm, R, zero_Celsius
+
+MOLAR_MASS_AIR = 28.97  # g/mol
+
+FLOW_EQUATION_CONSTANT = math.pi * math.sqrt(R/16./MOLAR_MASS_AIR*1000)
 
 
 def calculate_pipeline_average_temperature(t_ambient, t1, t2):
@@ -58,10 +63,10 @@ def calculate_height_difference_correction(h1, h2, z, p, t, sg):
 
 
 def calculate_pipeline_physical_characteristic(d, length, t_avg, f, eta):
-    tb = 288.15  # Temperature base, 15 Celsius
-    pb = 101325  # Pressure base, 1 bar
+    tb = zero_Celsius + 15  # Temperature base, 15 Celsius
+    pb = 1 * atm  # Pressure base, 1 atm
 
-    return (13.29 * tb / pb) * (d ** 2.5) * \
+    return (FLOW_EQUATION_CONSTANT * tb / pb) * (d ** 2.5) * \
            ((1 / (length * t_avg * f)) ** 0.5) * eta
 
 
