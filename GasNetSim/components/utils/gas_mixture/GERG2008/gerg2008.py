@@ -165,8 +165,10 @@ class GasMixtureGERG2008:
         self.energy = 0
         self.enthalpy = 0
         self.entropy = 0
-        self.Cv = 0  # isochoric heat capacity [J/mol-K]
-        self.Cp = 0  # isobaric heat capacity [J/mol-K]
+        self.Cv_molar = 0  # molar isochoric heat capacity [J/mol-K]
+        self.Cp_molar = 0  # molar isobaric heat capacity [J/mol-K]
+        self.Cp = 0  # isochoric heat capacity [J/kg-K]
+        self.Cv = 0  # isobaric heat capacity [J/kg-K]
         self.c = 0  # speed of sound [m/s]
         self.gibbs_energy = 0  # Gibbs energy [J/mol]
 
@@ -578,8 +580,10 @@ class GasMixtureGERG2008:
         self.energy = U
         self.enthalpy = H
         self.entropy = S
-        self.Cv = Cv
-        self.Cp = Cp
+        self.Cv_molar = Cv
+        self.Cp_molar = Cp
+        self.Cv = Cv * 1000 / molar_mass
+        self.Cp = Cp * 1000 / molar_mass
         self.c = W  # speed of sound [m/s]
         self.gibbs_energy = G  # Gibbs energy [J/mol]
         self.JT = JT / 1e3  # Joule-Thomson coefficient [K/Pa]
