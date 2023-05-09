@@ -231,7 +231,9 @@ class Pipeline:
         elif p1 ** 2 - p2 ** 2 - slope_correction < 0:
             return -1
         else:
-            raise ValueError('Got condition case 0.')
+            print(f"Pipeline {self.inlet_index} has same pressure on both ends!")
+            # raise ValueError('Got condition case 0.')
+            return 0
 
     def calc_flow_rate(self):
         """
