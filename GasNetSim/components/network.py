@@ -14,6 +14,7 @@ import logging
 import copy
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import optimize
 from collections import OrderedDict
 
 from .utils.gas_mixture.heating_value import *
@@ -438,6 +439,40 @@ class Network:
     def update_connection_flow_rate(self):
         for connection in self.connections.values():
             connection.flow_rate = connection.calc_flow_rate()
+
+    def fun(self, p):
+        init_f, init_p, init_t = self.newton_raphson_initialization()
+        init_f = [init_f[i] for i in range(len(init_f)) if i + 1 not in self.non_junction_nodes]
+
+        f_target = np.array(init_f)
+
+        flow_vector = calculate_flow_vector(network=self, pressure_bar=p, target_flow=f_target)
+        print(sorted([abs(x) for x in flow_vector])[-10:])
+
+        return flow_vector
+
+    def solving(self, fun, x0, jac, method, tol):
+        sol = optimize.root(fun, x0, jac=jac, method=method, tol=tol)
+        return sol.x
+
+    def newton_raphson_solving(self, fun, jac, x, target, alpha=1., tol=0.001, max_iter=100):
+        err = 1. + tol  # ensure the first iteration will be performed
+        n_iter = 0
+
+        # For the first iteration
+        delta_q = fun(x)
+
+        while err > tol:
+            dq_dp = - jac(x)
+            delta_p = np.linalg.solve(dq_dp, delta_q)
+            x += delta_p / alpha  # applying the under-relaxation factor to delta_p
+            delta_q = fun(x)  # update delta_q
+            err = abs(delta_q).max()
+            n_iter += 1
+            if n_iter >= max_iter:
+                return False
+
+        return x
 
     def simulation(self, max_iter=100, tol=0.001):
         logging.debug([x.flow for x in self.nodes.values()])
