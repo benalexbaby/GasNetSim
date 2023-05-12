@@ -31,7 +31,8 @@ before_script:
 
 run:
   script:
-  - pip install -e .
+#  - pip install -e .
+    - python setup.py install
     # run the command here
   artifacts:
     paths:
