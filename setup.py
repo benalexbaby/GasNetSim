@@ -61,7 +61,7 @@ def main():
                  description="A tool for gas network steady-state simulation.",
                  long_description=long_description,
                  long_description_content_type="text/markdown",
-                 python_requires=">=3.7",
+                 python_requires=">=3.9.16",
                  classifiers=["Programming Language :: Python :: 3.7",
                               "License :: OSI Approved :: Mozilla Public License 2.0",
                               "Operating System :: OS Independent"],
