@@ -9,7 +9,6 @@ setuptools>=60.9.3
 requests>=2.25.1
 pyparsing~=3.0.7
 cantera~=2.6.0
-
 thermo~=0.2.23
-tqdm~=4.64.1
-seaborn~=0.12.2
+tqdm>=4.64.1
+seaborn>=0.12.2
