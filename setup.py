@@ -62,7 +62,7 @@ def main():
                  long_description=long_description,
                  long_description_content_type="text/markdown",
                  python_requires=">=3.9.16",
-                 classifiers=["Programming Language :: Python :: 3.7",
+                 classifiers=["Programming Language :: Python :: 3.9",
                               "License :: OSI Approved :: Mozilla Public License 2.0",
                               "Operating System :: OS Independent"],
                  url="https://jugit.fz-juelich.de/iek-10/public/simulation/gasnetsim",
