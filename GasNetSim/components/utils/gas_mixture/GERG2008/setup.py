@@ -58,6 +58,8 @@ taupijk = np.zeros((MaxFlds + 1, MaxTrmM + 1))
 # it is only used internally in the density algorithm.
 # dPdDsave = 0
 
+air_molar_mass = 28.97  # g/mol
+
 
 # def SetupGERG():
 #     """

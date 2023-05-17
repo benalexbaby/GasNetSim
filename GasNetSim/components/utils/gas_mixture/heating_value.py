@@ -9,8 +9,8 @@
 from collections import OrderedDict
 import cantera as ct
 
-from .thermo.thermo import Mixture
-# from thermo import Mixture
+# from .thermo.thermo import Mixture
+from thermo import Mixture
 from .gas_mixture import *
 
 GAS = ct.Solution('gri30.cti')
