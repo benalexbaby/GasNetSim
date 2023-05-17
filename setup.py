@@ -8,19 +8,15 @@
 #    *****************************************************************************
 
 import subprocess
-from subprocess import check_call
 from setuptools import setup, find_packages
-from setuptools.command.install import install
-
-
-class CustomInstallCommand(install):
-    def run(self):
-        install.run(self)
-        check_call("pip install -r requirements.txt", shell=True)
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+with open('requirements.txt', 'r') as requirements_file:
+    requirements_text = requirements_file.read()
+    requirements = requirements_text.splitlines()
 
 
 def pip_install(package: str):
@@ -57,11 +53,11 @@ def main():
                  version=version,
                  author="IEK-10: Energy Systems Engineering, Forschungszentrum Jülich GmbH",
                  author_email="yifei.lu@fz-juelich.de",
-                 cmdclass={"install": CustomInstallCommand},
                  description="A tool for gas network steady-state simulation.",
                  long_description=long_description,
                  long_description_content_type="text/markdown",
                  python_requires=">=3.9.16",
+                 install_requires=requirements,
                  classifiers=["Programming Language :: Python :: 3.9",
                               "License :: OSI Approved :: Mozilla Public License 2.0",
                               "Operating System :: OS Independent"],
