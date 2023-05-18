@@ -32,7 +32,6 @@ before_script:
 run:
   script:
   - pip install -e .
-  - pip install -r ./requirements.txt
     # run the command here
   - pytest -v
   artifacts:
