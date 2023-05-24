@@ -37,26 +37,6 @@ def create_connection_matrix(n_nodes: int, components: dict, component_type: int
     return cnx
 
 
-def forward_substitution(L, b):
-    n_row = len(b)
-
-    z = np.zeros(n_row)
-
-    for row in range(n_row):
-        res = b[row]
-        for i in range(row - 1, -1):
-            res = res - L[row, i] * z[i]
-        z[row] = res
-    return z
-
-
-def backward_substitution(U, z):
-    n_row = len(z)
-    x = np.zeros(n_row)
-
-    return x
-
-
 def levenberg_marquardt_damping_factor(m, s, b):
     return 10 ** (m * math.log10(s + b))
 
