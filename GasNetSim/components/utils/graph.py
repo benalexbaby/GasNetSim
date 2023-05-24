@@ -26,10 +26,10 @@ def graph_nodal_degree_counter(G: nx.Graph):
     return dict(sorted(Counter(degrees).items()))
 
 
-def nodes_with_degree_n(G: nx.Graph, n: int):
-    degree_counter = graph_nodal_degree_counter(G)
-    if n in degree_counter.keys():
-        return degree_counter[n]
-    else:
-        print(f"There is no node in this network with degree {n}!")
-        return None
+def nodes_with_degree_n(graph, n):
+    node_indices = []
+    for node in graph.nodes():
+        degree = graph.degree(node)
+        if degree == n:
+            node_indices.append(node)
+    return node_indices
