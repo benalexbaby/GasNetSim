@@ -21,8 +21,17 @@ def create_graph(network: Network):
     return G
 
 
-def graph_info(G: nx.Graph):
+def graph_nodal_degree_counter(G: nx.Graph):
     degrees = []
     for (i, d) in G.degree():
         degrees.append(d)
-    print(sorted(Counter(degrees).items()))
+    return dict(sorted(Counter(degrees).items()))
+
+
+def nodes_with_degree_n(G: nx.Graph, n: int):
+    degree_counter = graph_nodal_degree_counter(G)
+    if n in degree_counter.keys():
+        return degree_counter[n]
+    else:
+        print(f"There is no node in this network with degree {n}!")
+        return None
