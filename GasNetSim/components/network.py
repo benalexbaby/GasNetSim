@@ -557,7 +557,7 @@ class Network:
             n_iter += 1
 
             target_flow = np.array([f_target[i] for i in range(len(f_target)) if i + 1 not in self.non_junction_nodes])
-            err = max([abs(x) for x in (delta_flow/target_flow)])
+            err = max([abs(x) for x in delta_flow])
 
             logging.debug(max([abs(x) for x in (delta_flow/target_flow)]))
             logging.debug(delta_p)
