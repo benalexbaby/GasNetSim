@@ -124,19 +124,28 @@ def calculate_nodal_inflow_states(nodes, connections, mapping_connections, flow_
     return nodal_gas_inflow_composition, nodal_gas_inflow_temperature
 
 
-def calculate_flow_matrix(pressure, network):
+def calculate_flow_matrix(network, pressure_bar):
     connections = network.connections
     nodes = network.nodes
     n_nodes = len(nodes)
     flow_mat = np.zeros((n_nodes, n_nodes), dtype=float)
 
+    pressure_index = 0
+    for node in nodes.values():
+        if node.index not in network.non_junction_nodes:
+            node.pressure = pressure_bar[pressure_index] * 1e5
+            pressure_index += 1
+
     for connection in connections.values():
         i = connection.inlet_index - 1
         j = connection.outlet_index - 1
+        connection.inlet = nodes[i+1]
+        connection.outlet = nodes[j+1]
 
         flow_direction = connection.determine_flow_direction()
-        p1 = pressure[i]
-        p2 = pressure[j]
+
+        p1 = nodes[i+1].pressure
+        p2 = nodes[j+1].pressure
 
         slope_correction = connection.calc_pipe_slope_correction()
         temp = connection.calculate_coefficient_for_iteration()
@@ -147,3 +156,14 @@ def calculate_flow_matrix(pressure, network):
         flow_mat[j][i] = flow_rate
 
     return flow_mat
+
+
+def calculate_flow_vector(network, pressure_bar, target_flow):
+    flow_matrix = calculate_flow_matrix(network, pressure_bar)
+    n_nodes = len(network.nodes.values())
+    nodal_flow = np.dot(flow_matrix, np.ones(n_nodes))
+    nodal_flow = [nodal_flow[i] for i in range(len(nodal_flow)) if i + 1 not in network.non_junction_nodes]
+    delta_flow = target_flow - nodal_flow
+
+    # delta_flow = [delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in network.non_junction_nodes]
+    return delta_flow
