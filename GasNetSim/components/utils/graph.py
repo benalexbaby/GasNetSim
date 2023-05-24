@@ -22,9 +22,7 @@ def create_graph(network: Network):
 
 
 def graph_nodal_degree_counter(G: nx.Graph):
-    degrees = []
-    for (i, d) in G.degree():
-        degrees.append(d)
+    degrees = [d for (i, d) in G.degree()]
     return dict(sorted(Counter(degrees).items()))
 
 
