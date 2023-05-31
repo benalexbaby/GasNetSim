@@ -14,7 +14,7 @@ from pathlib import Path
 from ..components.pipeline import Pipeline, Resistance, ShortPipe
 from ..components.node import Node
 from ..components.network import Network
-from ..utils.exception import *
+from .exception import *
 
 
 def read_nodes(path_to_file: Path) -> dict:

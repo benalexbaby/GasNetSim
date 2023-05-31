@@ -8,7 +8,7 @@
 #   *****************************************************************************
 import math
 import logging
-from GasNetSim.utils.exception import ZeroFlowError
+from ....utils.exception import ZeroFlowError
 from scipy.constants import atm, R, zero_Celsius
 
 MOLAR_MASS_AIR = 28.97  # g/mol
