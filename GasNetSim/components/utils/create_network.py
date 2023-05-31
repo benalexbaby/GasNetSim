@@ -1,20 +1,20 @@
-#  #!/usr/bin/env python
-#  -*- coding: utf-8 -*-
-#  ******************************************************************************
-#    Copyright (c) 2022.
-#    Developed by Yifei Lu
-#    Last change on 3/14/22, 9:41 PM
-#    Last change by yifei
-#   *****************************************************************************
+#   #!/usr/bin/env python
+#   -*- coding: utf-8 -*-
+#   ******************************************************************************
+#     Copyright (c) 2023.
+#     Developed by Yifei Lu
+#     Last change on 5/31/23, 4:14 PM
+#     Last change by yifei
+#    *****************************************************************************
 import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 
-from ..components.pipeline import Pipeline, Resistance, ShortPipe
-from ..components.node import Node
-from ..components.network import Network
-from .exception import *
+from GasNetSim.components.pipeline import Pipeline, Resistance, ShortPipe
+from GasNetSim.components.node import Node
+from GasNetSim.components.network import Network
+from GasNetSim.utils.exception import *
 
 
 def read_nodes(path_to_file: Path) -> dict:

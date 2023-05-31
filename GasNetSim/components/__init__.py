@@ -14,8 +14,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "utils/gas_mixture/therm
 from .node import Node
 from .pipeline import Pipeline
 from .network import Network
-from GasNetSim.components.utils.pipeline_function import *
-from GasNetSim.components.utils.gas_mixture import *
+from .utils.pipeline_function import *
+from .utils.gas_mixture import *
+from .utils.create_network import *
 
 
 
