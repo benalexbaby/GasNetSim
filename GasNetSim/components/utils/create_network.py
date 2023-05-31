@@ -11,7 +11,7 @@ import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 
-from GasNetSim.components.pipeline import Pipeline, Resistance, ShortPipe
+from GasNetSim.components.pipeline import Pipeline, Resistance, ShortPipe, LinearResistance
 from GasNetSim.components.node import Node
 from GasNetSim.components.network import Network
 from GasNetSim.utils.exception import *
@@ -88,6 +88,24 @@ def read_resistances(path_to_file: Path, network_nodes: dict) -> dict:
     return resistances
 
 
+def read_linear_resistances(path_to_file: Path, network_nodes: dict) -> dict:
+    """
+
+    :param path_to_file:
+    :param network_nodes:
+    :return:
+    """
+    resistances = dict()
+    df_linear_resistance = pd.read_csv(path_to_file, delimiter=';')
+    df_linear_resistance = df_linear_resistance.replace({np.nan: None})
+
+    for row_index, row in df_linear_resistance.iterrows():
+        resistances[row['linear_resistance_index']] = LinearResistance(inlet=network_nodes[row['inlet_index']],
+                                                                       outlet=network_nodes[row['outlet_index']],
+                                                                       resistance=row['linear_resistance'])
+    return resistances
+
+
 def read_shortpipes(path_to_file: Path, network_nodes: dict) -> dict:
     """
 
@@ -118,7 +136,8 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
                           'pipeline': None,
                           'compressor': None,
                           'resistance': None,
-                          'shortpipe': None}
+                          'shortpipe': None,
+                          'linear_resistance': None}
 
     for file in all_files:
         file_name = file.stem
@@ -133,6 +152,9 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
         elif 'resistance' in file_name:
             resistances = read_resistances(file, nodes)
             network_components['resistance'] = resistances
+        elif 'linearR' in file_name:
+            linear_resistances = read_linear_resistances(file, nodes)
+            network_components['linear_resistance'] = linear_resistances
         elif 'shortpipe' in file_name:
             shortpipes = read_shortpipes(file, nodes)
             network_components['shortpipe'] = shortpipes
@@ -143,4 +165,5 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
                    pipelines=network_components['pipeline'],
                    compressors=network_components['compressor'],
                    resistances=network_components['resistance'],
+                   linear_resistances=network_components['linear_resistance'],
                    shortpipes=network_components['shortpipe'])

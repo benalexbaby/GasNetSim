@@ -32,7 +32,8 @@ class Network:
     Network class
     """
 
-    def __init__(self, nodes: dict, pipelines=None, compressors=None, resistances=None, shortpipes=None):
+    def __init__(self, nodes: dict, pipelines=None, compressors=None, resistances=None,
+                 linear_resistances=None, shortpipes=None):
         """
 
         :param nodes:
@@ -42,6 +43,7 @@ class Network:
         self.pipelines = pipelines
         self.compressors = compressors
         self.resistances = resistances
+        self.linear_resistances = linear_resistances
         self.shortpipes = shortpipes
         self.connections = self.all_edge_components()
         self.connection_matrix = self.create_connection_matrix()
@@ -52,7 +54,8 @@ class Network:
     def all_edge_components(self):
         connections = dict()
 
-        all_edge_classes = [self.pipelines, self.resistances, self.compressors, self.shortpipes]
+        all_edge_classes = [self.pipelines, self.resistances, self.compressors,
+                            self.linear_resistances, self.shortpipes]
 
         i_connection = 0
 
@@ -233,6 +236,10 @@ class Network:
             resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
                                      for x in self.resistances.values()]
             resistance += resistance_resistance
+        if self.linear_resistances is not None:
+            linear_resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+                                             for x in self.linear_resistances.values()]
+            resistance += linear_resistance_resistance
         if self.shortpipes is not None:
             shortpipe_resistance = [[x.inlet_index, x.outlet_index, 0, -x.inlet.flow]
                                     for x in self.shortpipes.values()]
