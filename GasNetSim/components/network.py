@@ -375,12 +375,12 @@ class Network:
                 temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i not in non_junction_nodes and j not in non_junction_nodes:
-                    jacobian_mat[i][j] = pipeline_coefficient * p2 * temp_var
-                    jacobian_mat[j][i] = pipeline_coefficient * p1 * temp_var
+                    jacobian_mat[i][j] = connection.flow_rate_first_order_derivative(is_inlet=False)
+                    jacobian_mat[j][i] = connection.flow_rate_first_order_derivative(is_inlet=True)
                 if i not in non_junction_nodes:
-                    jacobian_mat[i][i] += - pipeline_coefficient * p1 * temp_var
+                    jacobian_mat[i][i] += - connection.flow_rate_first_order_derivative(is_inlet=True)
                 if j not in non_junction_nodes:
-                    jacobian_mat[j][j] += - pipeline_coefficient * p2 * temp_var
+                    jacobian_mat[j][j] += - connection.flow_rate_first_order_derivative(is_inlet=False)
 
         jacobian_mat = delete_matrix_rows_and_columns(jacobian_mat, non_junction_nodes)
         # flow_mat = delete_matrix_rows_and_columns(flow_mat, non_junction_nodes)

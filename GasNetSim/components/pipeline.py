@@ -251,7 +251,19 @@ class Pipeline:
         slope_correction = self.calc_pipe_slope_correction()
         tmp = self.calculate_coefficient_for_iteration()
 
-        return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * temp
+        return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * tmp
+
+    def flow_rate_first_order_derivative(self, is_inlet=True):
+        p1 = self.inlet.pressure
+        p2 = self.outlet.pressure
+        slope_corr = self.calc_pipe_slope_correction()
+        pipeline_coefficient = self.calculate_coefficient_for_iteration()
+        tmp = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
+
+        if is_inlet:
+            return pipeline_coefficient * p1 * tmp
+        else:
+            return pipeline_coefficient * p2 * tmp
 
     def calc_gas_mass_flow(self):
         """
