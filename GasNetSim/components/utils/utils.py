@@ -11,6 +11,8 @@ from pyparsing import col
 from collections import OrderedDict
 from scipy import sparse
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def create_connection_matrix(n_nodes: int, components: dict, component_type: int, sparse_matrix: bool = False):
@@ -147,3 +149,13 @@ def calculate_flow_vector(network, pressure_bar, target_flow):
 
     # delta_flow = [delta_flow[i] for i in range(len(delta_flow)) if i + 1 not in network.non_junction_nodes]
     return delta_flow
+
+
+def plot_network_demand_distribution(network):
+    nodes = network.nodes.values()
+    node_demand = [n.flow for n in nodes if n.flow is not None]
+    sns.histplot(data=node_demand, stat="probability")
+    plt.xlim((-2, max(node_demand) + 10))
+    plt.xlabel("Nodal volumetric flow demand [sm^3/s]")
+    plt.show()
+    return None
