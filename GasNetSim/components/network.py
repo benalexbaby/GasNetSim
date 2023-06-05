@@ -481,7 +481,7 @@ class Network:
 
         return x
 
-    def simulation(self, max_iter=100, tol=0.001):
+    def simulation(self, max_iter=100, tol=0.001, underrelaxation_factor=2.):
         logging.debug([x.flow for x in self.nodes.values()])
         # ref_nodes = self.p_ref_nodes_index
 
@@ -543,7 +543,7 @@ class Network:
             f_target = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
 
             delta_p = np.linalg.solve(j_mat, delta_flow)  # np.linalg.solve() uses LU decomposition as default
-            delta_p /= 2  # divided by 2 to ensure better convergence
+            delta_p /= underrelaxation_factor  # divided by 2 to ensure better convergence
             logging.debug(delta_p)
 
             for i in self.non_junction_nodes:
