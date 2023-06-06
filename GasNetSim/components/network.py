@@ -371,8 +371,8 @@ class Network:
             i = connection.inlet_index - 1
             j = connection.outlet_index - 1
 
-            flow_mat[i][j] = - connection.calc_flow_rate()
-            flow_mat[j][i] = connection.calc_flow_rate()
+            flow_mat[i][j] -= connection.calc_flow_rate()
+            flow_mat[j][i] += connection.calc_flow_rate()
 
             if type(connection) is not ShortPipe:
                 slope_corr = connection.calc_pipe_slope_correction()
@@ -382,8 +382,8 @@ class Network:
                 temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i not in non_junction_nodes and j not in non_junction_nodes:
-                    jacobian_mat[i][j] = connection.flow_rate_first_order_derivative(is_inlet=False)
-                    jacobian_mat[j][i] = connection.flow_rate_first_order_derivative(is_inlet=True)
+                    jacobian_mat[i][j] += connection.flow_rate_first_order_derivative(is_inlet=False)
+                    jacobian_mat[j][i] += connection.flow_rate_first_order_derivative(is_inlet=True)
                 if i not in non_junction_nodes:
                     jacobian_mat[i][i] += - connection.flow_rate_first_order_derivative(is_inlet=True)
                 if j not in non_junction_nodes:
