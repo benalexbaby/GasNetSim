@@ -12,10 +12,10 @@ from ..network import Network
 
 
 def create_graph(network: Network):
-    pipelines = network.pipelines
+    connections = network.connections
     l_edges = []
-    for pipeline in pipelines.values():
-        l_edges.append({pipeline.inlet_index, pipeline.outlet_index})
+    for connection in connections.values():
+        l_edges.append({connection.inlet_index, connection.outlet_index})
     G = nx.Graph()
     G.add_edges_from(l_edges)
     return G
