@@ -8,6 +8,7 @@
 #   *****************************************************************************
 import math
 
+
 def calculate_beta_coefficient(ul, qm, cp, D):
     """
 
@@ -59,16 +60,18 @@ if __name__ == "__main__":
     from scipy.constants import bar, R
 
     # from GasNetSim.components.utils.gas_mixture.thermo.thermo import Mixture
-    from thermo import Mixture
+    from GasNetSim.components.utils.gas_mixture.gas_mixture import GasMixture
 
-    gas_mixture = Mixture(T=300, P=50 * bar, zs={"methane": 0.9, "hydrogen": 0.1})
+    gas_mixture = GasMixture(temperature=300,
+                             pressure=50 * bar,
+                             composition={"methane": 0.9, "hydrogen": 0.1})
     heat_transfer_coefficient = 3.69 * 10
     mass_flow_rate = 55  # kg/s
-    Cp = gas_mixture.Cp
+    Cp = gas_mixture.heat_capacity_constant_pressure
     diameter = 0.5
-    JT = gas_mixture.JT
-    Z = gas_mixture.Z
-    R_specific = R / gas_mixture.MW
+    JT = gas_mixture.joule_thomson_coefficient
+    Z = gas_mixture.compressibility
+    R_specific = gas_mixture.R_specific
     friction_factor = 0.01
     average_pressure = 50*bar
     beta = calculate_beta_coefficient(heat_transfer_coefficient, mass_flow_rate, Cp, diameter)
