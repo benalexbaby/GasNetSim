@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Support for parallel pipelines
 - Test for pipeline outlet temperature calculation function
 - Test and validation with original [C++ implementation](https://github.com/usnistgov/AGA8/tree/master/AGA8CODE/C) of GERG-2008 EOS
 - Added support of heating value calculation for GERG2008 gas mixture class
