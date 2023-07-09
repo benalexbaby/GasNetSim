@@ -8,7 +8,7 @@
 #    *****************************************************************************
 import logging
 import math
-from scipy.constants import atm, zero_Celsius
+from scipy.constants import bar, atm, zero_Celsius
 
 from .node import *
 from .utils.pipeline_function.flow_rate import *
@@ -480,9 +480,8 @@ class LinearResistance:
         p1 = self.inlet.pressure
         p2 = self.outlet.pressure
         pipeline_coefficient = self.calculate_coefficient_for_iteration()
-        tmp = abs(p1 - p2)
 
-        return pipeline_coefficient * tmp
+        return pipeline_coefficient
 
 
     def calc_gas_mass_flow(self):
