@@ -7,6 +7,7 @@
 #    Last change by yifei
 #   *****************************************************************************
 from .utils.gas_mixture import *
+from scipy.constants import bar, atm
 
 
 class Node:
@@ -31,7 +32,7 @@ class Node:
             self.gas_composition = NATURAL_GAS_gri30
         self.pressure = pressure_pa
         if pressure_pa is not None:
-            self.pressure_bar = pressure_pa / 101325
+            self.pressure_bar = pressure_pa / bar
         if temperature is not None:
             self.temperature = temperature
         else:
@@ -59,7 +60,7 @@ class Node:
             # If pressure or temperature is missing for some nodes
             self.gas_mixture = GasMixture(composition=self.gas_composition,
                                           temperature=288.15,
-                                          pressure=50 * 101325)
+                                          pressure=50 * bar)
 
         self.flow = flow
         if self.flow_type == 'volumetric':
@@ -85,7 +86,7 @@ class Node:
         except (TypeError, AttributeError):
             self.gas_mixture = GasMixture(composition=NATURAL_GAS_gri30,
                                           temperature=288.15,
-                                          pressure=50 * 101325)
+                                          pressure=50 * bar)
 
     def get_mole_fraction(self):
         """
@@ -111,7 +112,7 @@ class Node:
         gas_comp = self.get_mole_fraction()
         self.volumetric_flow = self.energy_flow / HHV * 1e6 / GasMixture(composition=gas_comp,
                                                                          temperature=288.15,
-                                                                         pressure=101325).density
+                                                                         pressure=1*atm).density
 
     def convert_volumetric_to_energy_flow(self):
         """
@@ -122,7 +123,7 @@ class Node:
         gas_comp = self.get_mole_fraction()
         self.energy_flow = self.volumetric_flow * HHV / 1e6 * GasMixture(composition=gas_comp,
                                                                          temperature=288.15,
-                                                                         pressure=101325).density
+                                                                         pressure=1*atm).density
 
 
 if __name__ == "__main__":
