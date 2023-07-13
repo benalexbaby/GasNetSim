@@ -378,8 +378,7 @@ class Network:
                 slope_corr = connection.calc_pipe_slope_correction()
                 p1 = connection.inlet.pressure
                 p2 = connection.outlet.pressure
-                pipeline_coefficient = connection.calculate_coefficient_for_iteration()
-                temp_var = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
+                tmp = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
                 if i not in non_junction_nodes and j not in non_junction_nodes:
                     jacobian_mat[i][j] += connection.flow_rate_first_order_derivative(is_inlet=False)
