@@ -357,7 +357,6 @@ class Network:
         connections = self.connections
         nodes = self.nodes
 
-        reference_nodes = [x-1 for x in self.reference_nodes]  # indices of reference nodes
         non_junction_nodes = [x-1 for x in self.non_junction_nodes]
 
         n_nodes = len(nodes)
@@ -482,7 +481,6 @@ class Network:
 
     def simulation(self, max_iter=100, tol=0.001, underrelaxation_factor=2.):
         logging.debug([x.flow for x in self.nodes.values()])
-        # ref_nodes = self.p_ref_nodes_index
 
         n_nodes = len(self.nodes.keys())
         n_non_junction_nodes = len(self.non_junction_nodes)
@@ -499,7 +497,8 @@ class Network:
         logging.info(f'Initial pressure: {p}')
         logging.info(f'Initial flow: {f_target}')
 
-        self.update_node_parameters(pressure=p, flow=f_target, temperature=t)
+        reference_nodes = [x-1 for x in self.reference_nodes]  # indices of reference nodes
+        self.update_node_parameters(pressure=p, flow=np.delete(f_target, reference_nodes), temperature=t)
         if self.pipelines is not None:
             self.update_pipeline_parameters()
         if self.resistances is not None:
