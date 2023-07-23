@@ -7,6 +7,7 @@
 #    Last change by yifei
 #   *****************************************************************************
 from .utils.gas_mixture import *
+from ..utils.exception import InitializationError
 from scipy.constants import bar, atm
 
 
@@ -15,8 +16,8 @@ class Node:
     Class to formulate gas transmission network nodes.
     """
 
-    def __init__(self, node_index, flow=None, pressure_pa=None, temperature=288.15, altitude=0, gas_composition=None,
-                 node_type='demand', flow_type='volumetric', volumetric_flow=0, energy_flow=0):
+    def __init__(self, node_index, volumetric_flow=None, energy_flow=None, pressure_pa=None,
+                 temperature=288.15, altitude=0, gas_composition=None, node_type='demand'):
         """
         Initial method
         :param node_index: Node index
@@ -46,12 +47,11 @@ class Node:
         else:
             self.node_type = 'demand'
         # flow type
-        if flow_type is not None:
-            self.flow_type = flow_type
-        else:
-            self.flow_type = 'volumetric'
-        if flow is None and pressure_pa is None:
-            raise InitializationError("Either pressure or flow should be known.")
+        # if flow_type is not None:
+        #     self.flow_type = flow_type
+        # else:
+        #     self.flow_type = 'volumetric'
+
         try:
             self.gas_mixture = GasMixture(composition=self.gas_composition,
                                           temperature=self.temperature,
@@ -62,21 +62,22 @@ class Node:
                                           temperature=288.15,
                                           pressure=50 * bar)
 
-        self.flow = flow
-        if self.flow_type == 'volumetric':
-            self.volumetric_flow = flow
+        # self.flow = flow
+        self.volumetric_flow = volumetric_flow
+        self.energy_flow = energy_flow
+        if volumetric_flow is not None:
             try:
                 self.convert_volumetric_to_energy_flow()
             except TypeError:
                 self.energy_flow = None
-        elif self.flow_type == 'energy':
-            self.energy_flow = flow
+        elif energy_flow is not None:
             try:
                 self.convert_energy_to_volumetric_flow()
             except TypeError:
                 self.volumetric_flow = None
         else:
-            raise AttributeError(f'Unknown flow type {flow_type}!')
+            if pressure_pa is None:
+                raise InitializationError("Either pressure or flow should be known.")
 
     def update_gas_mixture(self):
         try:
@@ -128,6 +129,7 @@ class Node:
 
 if __name__ == "__main__":
     from GasNetSim.components.utils.gas_mixture.typical_mixture_composition import *
-    # from ..components.gas_mixture.thermo.thermo import Mixture
-    # from ..components.gas_mixture.heating_value import *
-    Node(flow=None, pressure_pa=None, temperature=300)
+    from GasNetSim.components.utils.gas_mixture import *
+    from GasNetSim.utils.exception import InitializationError
+
+    Node(node_index=1, volumetric_flow=10, pressure_pa=None, temperature=300)
