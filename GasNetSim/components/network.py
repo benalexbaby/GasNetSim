@@ -480,7 +480,7 @@ class Network:
         return x
 
     def simulation(self, max_iter=100, tol=0.001, underrelaxation_factor=2.):
-        logging.debug([x.flow for x in self.nodes.values()])
+        logging.debug([x.volumetric_flow for x in self.nodes.values()])
 
         n_nodes = len(self.nodes.keys())
         n_non_junction_nodes = len(self.non_junction_nodes)
