@@ -498,7 +498,7 @@ class Network:
         logging.info(f'Initial flow: {f_target}')
 
         reference_nodes = [x-1 for x in self.reference_nodes]  # indices of reference nodes
-        self.update_node_parameters(pressure=p, flow=np.delete(f_target, reference_nodes), temperature=t)
+        self.update_node_parameters(pressure=p, flow=f_target, temperature=t)
         if self.pipelines is not None:
             self.update_pipeline_parameters()
         if self.resistances is not None:
