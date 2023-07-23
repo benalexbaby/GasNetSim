@@ -43,5 +43,3 @@ NATURAL_GAS = OrderedDict([('methane', 0.947),
                            ('hydrogen', 0.0002)])
 
 HYDROGEN = OrderedDict([('hydrogen', 1)])
-
-ATM = 101325  # 1 atm
