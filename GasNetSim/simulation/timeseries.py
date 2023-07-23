@@ -12,6 +12,7 @@ import logging
 import copy
 
 from ..components.network import Network
+from ..components.utils.utils import plot_network_demand_distribution
 
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +21,7 @@ logger.setLevel(level=logging.WARNING)
 
 
 def read_profiles(file):
-    profiles = pd.read_csv(Path(file))
+    profiles = pd.read_csv(Path(file), sep=";")
     logger.info(f'Reading profiles from {file}.')
     return profiles
 
@@ -92,7 +93,7 @@ def update_network_topology(network):
     return Network(nodes=remaining_nodes, pipelines=None, resistances=remaining_pipes)
 
 
-def run_time_series(network, file=None):
+def run_time_series(network, file=None, profile_type="energy"):
     # create a copy of the input network
     full_network = copy.deepcopy(network)
 
@@ -107,19 +108,31 @@ def run_time_series(network, file=None):
     error_log = list()
 
     for t in time_steps:
+        full_network = copy.deepcopy(network)
         for i in full_network.nodes.keys():
             if i in full_network.reference_nodes:
-                pass
+                full_network.nodes[i].volumetric_flow = None
+                full_network.nodes[i].energy_flow = None
             else:
                 try:
-                    full_network.nodes[i].demand = profiles[str(i)][t]
-                    full_network.nodes[i].demand_type = 'energy'
+                    if profile_type == "volumetric":
+                        full_network.nodes[i].volumetric_flow = profiles[str(i)][t]
+                    elif profile_type == "energy":
+                        full_network.nodes[i].energy_flow = profiles[str(i)][t]
+                    else:
+                        raise ValueError(f"Unknown profile type {profile_type}!")
+                    # full_network.nodes[i].demand_type = 'energy'
                 except KeyError:
                     pass
-        simplified_network = update_network_topology(full_network)
+        # simplified_network = update_network_topology(full_network)
         try:
-            network = run_snapshot(simplified_network)
+            # network = run_snapshot(simplified_network)
+            for n in full_network.nodes.values():
+                if n.volumetric_flow is not None and n.volumetric_flow < 0:
+                    print(n.volumetric_flow)
+            full_network = copy.deepcopy(run_snapshot(full_network))
         except RuntimeError:
-            error_log.append([simplified_network, profiles.iloc[t]])
+            # error_log.append([simplified_network, profiles.iloc[t]])
+            error_log.append([full_network, profiles.iloc[t]])
 
-    return network
+    return full_network
