@@ -32,12 +32,12 @@ def read_nodes(path_to_file: Path) -> dict:
             row['gas_composition'] = OrderedDict(eval(row['gas_composition']))
         nodes[row['node_index']] = Node(node_index=row['node_index'],
                                         pressure_pa=row['pressure_pa'],
-                                        flow=row['flow_sm3_per_s'],
+                                        volumetric_flow=row['flow_sm3_per_s'],
+                                        energy_flow=row['flow_MW'],
                                         temperature=row['temperature_k'],
                                         altitude=row['altitude_m'],
                                         gas_composition=row['gas_composition'],
-                                        node_type=row['node_type'],
-                                        flow_type=row['flow_type'])
+                                        node_type=row['node_type'])
     return nodes
 
 
