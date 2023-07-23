@@ -510,7 +510,7 @@ class ShortPipe:
         self.outlet = outlet
         self.inlet_index = inlet.index
         self.outlet_index = outlet.index
-        self.flow_rate = - self.inlet.flow  # Short pipes are used to connect to supply nodes
+        self.flow_rate = - self.inlet.volumetric_flow  # Short pipes are used to connect to supply nodes
         self.gas_mixture = self.inlet.gas_mixture
 
     def update_gas_mixture(self):
