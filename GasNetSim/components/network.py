@@ -138,25 +138,25 @@ class Network:
 
         return OrderedDict(sorted(nodal_supply_pipelines.items()))
 
-    def convert_energy_flow_to_volumetric_flow(self, base='HHV'):
-        for node in self.nodes.values():
-            gas_comp = node.get_mole_fraction()
-            standard_density = GasMixture(pressure=101325, temperature=288.15, composition=gas_comp).density
-            LHV, HHV = calc_heating_value(node.gas_mixture)
-            if base == 'HHV':
-                heating_value = HHV/1e6*standard_density  # MJ/sm3
-            elif base == 'LHV':
-                heating_value = LHV/1e6*standard_density  # MJ/sm3
-            else:
-                raise ValueError
-            if node.flow is not None:
-                node.flow /= heating_value
-                # try:
-                #     h2_fraction = node.gas_mixture.zs[node.gas_mixture.components.index('hydrogen')]
-                # except:
-                #     h2_fraction = 0
-                # node.flow /= (h2_fraction * 12.09 + (1-h2_fraction) * 38.28)
-        return None
+    # def convert_energy_flow_to_volumetric_flow(self, base='HHV'):
+    #     for node in self.nodes.values():
+    #         gas_comp = node.get_mole_fraction()
+    #         standard_density = GasMixture(pressure=101325, temperature=288.15, composition=gas_comp).density
+    #         LHV, HHV = calc_heating_value(node.gas_mixture)
+    #         if base == 'HHV':
+    #             heating_value = HHV/1e6*standard_density  # MJ/sm3
+    #         elif base == 'LHV':
+    #             heating_value = LHV/1e6*standard_density  # MJ/sm3
+    #         else:
+    #             raise ValueError
+    #         if node.energy_flow is not None:
+    #             node.volumetric_flow /= heating_value
+    #             # try:
+    #             #     h2_fraction = node.gas_mixture.zs[node.gas_mixture.components.index('hydrogen')]
+    #             # except:
+    #             #     h2_fraction = 0
+    #             # node.flow /= (h2_fraction * 12.09 + (1-h2_fraction) * 38.28)
+    #     return None
 
     def create_connection_matrix(self, sparse_matrix=False):
         # TODO change the index number
@@ -229,24 +229,24 @@ class Network:
         # create a list to store all component resistance
         resistance = list()
         if self.pipelines is not None:
-            pipeline_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+            pipeline_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.volumetric_flow]
                                    for x in self.pipelines.values()]
             resistance += pipeline_resistance
         if self.resistances is not None:
-            resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+            resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.volumetric_flow]
                                      for x in self.resistances.values()]
             resistance += resistance_resistance
         if self.linear_resistances is not None:
-            linear_resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.flow]
+            linear_resistance_resistance = [[x.inlet_index, x.outlet_index, x.resistance, x.outlet.volumetric_flow]
                                              for x in self.linear_resistances.values()]
             resistance += linear_resistance_resistance
         if self.shortpipes is not None:
-            shortpipe_resistance = [[x.inlet_index, x.outlet_index, 0, -x.inlet.flow]
+            shortpipe_resistance = [[x.inlet_index, x.outlet_index, 0, -x.inlet.volumetric_flow]
                                     for x in self.shortpipes.values()]
             resistance += shortpipe_resistance
 
         max_resistance = max([x[2] for x in resistance])
-        max_flow = max([x.flow for x in nodes.values() if x.flow is not None])
+        max_flow = max([x.volumetric_flow for x in nodes.values() if x.volumetric_flow is not None])
         pressure_init = [node.pressure for node in nodes.values()]
         # pipeline_with_missing_pressure = copy.deepcopy(pipelines)
         pressure_init_old = list()
@@ -304,20 +304,20 @@ class Network:
         # TODO consider the case where ref_nodes do not start with index 0
         p_ref_nodes = self.reference_nodes
 
-        for node in self.nodes.values():
-            HHV = calc_heating_value(node.gas_mixture)
-            if node.flow_type == 'volumetric':
-                pass
-            elif node.flow_type == 'energy':
-                gas_comp = node.get_mole_fraction()
-                node.flow = node.flow / HHV * 1e6 / GasMixture(composition=gas_comp,
-                                                               temperature=288.15,
-                                                               pressure=101325).density
-                logging.debug(node.flow)
-                node.flow_type = 'volumetric'
-            else:
-                raise AttributeError(f'Unknown flow type {node.flow_type}!')
-        nodal_flow_init = [x.flow if x.flow is not None else 0 for x in nodes.values()]
+        # for node in self.nodes.values():
+        #     HHV = calc_heating_value(node.gas_mixture)
+        #     if node.flow_type == 'volumetric':
+        #         pass
+        #     elif node.flow_type == 'energy':
+        #         gas_comp = node.get_mole_fraction()
+        #         node.flow = node.flow / HHV * 1e6 / GasMixture(composition=gas_comp,
+        #                                                        temperature=288.15,
+        #                                                        pressure=101325).density
+        #         logging.debug(node.flow)
+        #         node.flow_type = 'volumetric'
+        #     else:
+        #         raise AttributeError(f'Unknown flow type {node.flow_type}!')
+        nodal_flow_init = [x.volumetric_flow if x.volumetric_flow is not None else 0 for x in nodes.values()]
         pressure_init = [x.pressure for x in nodes.values()]
 
         # TODO use ambient temperature to initialize outlet temperature
@@ -335,7 +335,7 @@ class Network:
         for i in range(len(nodal_flow_init)):
             # TODO change to number of non-reference nodes
             nodes[i + 1].pressure = pressure_init[i]
-            nodes[i + 1].flow = nodal_flow_init[i]
+            # nodes[i + 1].flow = nodal_flow_init[i]
             nodes[i + 1].volumetric_flow = nodal_flow_init[i]
             nodes[i + 1].convert_volumetric_to_energy_flow()
             nodes[i + 1].temperature = temperature_init[i]
@@ -425,8 +425,8 @@ class Network:
         for i in range(len(flow)):
             # TODO change to number of non-reference nodes
             self.nodes[i + 1].pressure = pressure[i]
-            self.nodes[i + 1].flow = flow[i]
-            self.nodes[i + 1].temperature = temperature[i]
+            self.nodes[i + 1].volumetric_flow = flow[i]
+            self.nodes[i + 1].convert_volumetric_to_energy_flow()
             self.nodes[i + 1].update_gas_mixture()
 
     def update_pipeline_parameters(self):
@@ -538,14 +538,14 @@ class Network:
             # Update volumetric flow rate target
             for n in self.nodes.values():
                 n.convert_energy_to_volumetric_flow()
-            f_target = np.array([x.volumetric_flow if x.flow is not None else 0 for x in self.nodes.values()])
+            f_target = np.array([x.volumetric_flow if x.volumetric_flow is not None else 0 for x in self.nodes.values()])
 
             delta_p = np.linalg.solve(j_mat, delta_flow)  # np.linalg.solve() uses LU decomposition as default
             delta_p /= underrelaxation_factor  # divided by 2 to ensure better convergence
             logging.debug(delta_p)
 
             for i in self.non_junction_nodes:
-                delta_p = np.insert(delta_p, i-1, 0)
+                delta_p = np.insert(delta_p, i-1, 0)  # TODO check this
 
             p += delta_p  # update nodal pressure list
 
@@ -576,7 +576,7 @@ class Network:
         # pipe_h2_fraction = list()
 
         for i_node in self.non_junction_nodes:
-            self.nodes[i_node].flow = nodal_flow[i_node - 1]
+            self.nodes[i_node].volumetric_flow = nodal_flow[i_node - 1]
 
         # output connection
         for i_connection, connection in self.connections.items():
