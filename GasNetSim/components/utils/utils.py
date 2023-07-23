@@ -153,9 +153,9 @@ def calculate_flow_vector(network, pressure_bar, target_flow):
 
 def plot_network_demand_distribution(network):
     nodes = network.nodes.values()
-    node_demand = [n.flow for n in nodes if n.flow is not None]
+    node_demand = [n.volumetric_flow for n in nodes if n.volumetric_flow is not None]
     sns.histplot(data=node_demand, stat="probability")
-    plt.xlim((-2, max(node_demand) + 10))
+    plt.xlim((min(node_demand)-10, max(node_demand) + 10))
     plt.xlabel("Nodal volumetric flow demand [sm^3/s]")
     plt.show()
     return None
