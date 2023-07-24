@@ -548,7 +548,7 @@ class ShortPipe:
         :return: Volumetric flow rate [sm3/s]
         """
 
-        return - self.inlet.flow
+        return - self.inlet.volumetric_flow
 
     def calc_gas_mass_flow(self):
         """
