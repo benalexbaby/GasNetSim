@@ -618,7 +618,7 @@ class GasMixtureGERG2008:
         hcn = 0.0
         hsn = 0.0
 
-        a0 = np.zeros(3)
+        a0 = [0] * 3
         if D > epsilon:
             LogD = math.log(D)
         else:
@@ -730,9 +730,9 @@ class GasMixtureGERG2008:
         global Told, Trold, Trold2, Drold
 
         global Tr, Dr
-        delp = np.zeros(7+1)
-        Expd = np.zeros(7+1)
-        ar = np.zeros((4, 4))
+        delp = [0] * (7+1)
+        Expd = [0] * (7+1)
+        ar = [[0] * 4 for _ in range(4)]
 
         for i in range(4):
             for j in range(4):
@@ -837,7 +837,7 @@ class GasMixtureGERG2008:
         :param x:
         :return:
         """
-        taup0 = np.zeros(12+1)
+        taup0 = [0] * (12+1)
 
         i = 5  # Use propane to get exponents for short form of EOS
         for k in range(1, int(kpol[i] + kexp[i] + 1)):  # for (int k = 1; k <= kpol[i] + kexp[i]; ++k)
