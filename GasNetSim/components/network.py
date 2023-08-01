@@ -33,7 +33,8 @@ class Network:
     """
 
     def __init__(self, nodes: dict, pipelines=None, compressors=None, resistances=None,
-                 linear_resistances=None, shortpipes=None):
+                 linear_resistances=None, shortpipes=None, run_initialization=True,
+                 pressure_prev=None):
         """
 
         :param nodes:
@@ -50,6 +51,8 @@ class Network:
         self.reference_nodes = self.find_reference_nodes()
         self.non_junction_nodes = self.find_non_junction_nodes()
         self.junction_nodes = self.find_junction_nodes()
+        self.run_initialization = run_initialization
+        self.pressure_prev = pressure_prev
 
     def all_edge_components(self):
         connections = dict()
@@ -329,8 +332,10 @@ class Network:
         for n in p_ref_nodes:
             nodal_flow_init[n - 1] = - total_flow / len(p_ref_nodes)
 
-        if None in pressure_init:
+        if self.run_initialization:
             pressure_init = self.pressure_initialization()
+        else:
+            pressure_init = self.pressure_prev
 
         for i in range(len(nodal_flow_init)):
             # TODO change to number of non-reference nodes
@@ -459,6 +464,14 @@ class Network:
     def solving(self, fun, x0, jac, method, tol):
         sol = optimize.root(fun, x0, jac=jac, method=method, tol=tol)
         return sol.x
+
+    def save_pressure_values(self):
+        return [n.pressure for n in self.nodes.values()]
+
+    def assign_pressure_values(self, p):
+        for i in self.nodes.keys():
+            if i not in self.reference_nodes:
+                self.nodes[i].pressure = p[i - 1]  # update nodal pressure
 
     def newton_raphson_solving(self, fun, jac, x, target, alpha=1., tol=0.001, max_iter=100):
         err = 1. + tol  # ensure the first iteration will be performed

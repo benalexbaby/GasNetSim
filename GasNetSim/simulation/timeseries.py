@@ -107,8 +107,17 @@ def run_time_series(network, file=None, profile_type="energy"):
     # create error log to record the time step indices where error occurs
     error_log = list()
 
+    pressure_prev = None
+
     for t in time_steps:
         full_network = copy.deepcopy(network)
+        full_network.pressure_prev = pressure_prev  # Nodal pressure values at previous time step
+        if pressure_prev is None:
+            full_network.run_initialization = True
+        else:
+            full_network.run_initialization = False
+            full_network.assign_pressure_values(pressure_prev)
+
         for i in full_network.nodes.keys():
             if i in full_network.reference_nodes:
                 full_network.nodes[i].volumetric_flow = None
@@ -117,8 +126,10 @@ def run_time_series(network, file=None, profile_type="energy"):
                 try:
                     if profile_type == "volumetric":
                         full_network.nodes[i].volumetric_flow = profiles[str(i)][t]
+                        full_network.nodes[i].convert_volumetric_to_energy_flow()
                     elif profile_type == "energy":
                         full_network.nodes[i].energy_flow = profiles[str(i)][t]
+                        full_network.nodes[i].convert_energy_to_volumetric_flow()
                     else:
                         raise ValueError(f"Unknown profile type {profile_type}!")
                     # full_network.nodes[i].demand_type = 'energy'
@@ -131,6 +142,7 @@ def run_time_series(network, file=None, profile_type="energy"):
                 if n.volumetric_flow is not None and n.volumetric_flow < 0:
                     print(n.volumetric_flow)
             full_network = copy.deepcopy(run_snapshot(full_network))
+            pressure_prev = full_network.save_pressure_values()
         except RuntimeError:
             # error_log.append([simplified_network, profiles.iloc[t]])
             error_log.append([full_network, profiles.iloc[t]])
