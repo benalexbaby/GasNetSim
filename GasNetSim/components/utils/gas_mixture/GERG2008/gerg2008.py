@@ -590,7 +590,7 @@ class GasMixtureGERG2008:
         self.gibbs_energy = G  # Gibbs energy [J/mol]
         self.JT = JT / 1e3  # Joule-Thomson coefficient [K/Pa]
         self.isentropic_exponent = Kappa  # Isentropic exponent
-        self.rho = self.MolarMass * self.P * 1000 / RT
+        self.rho = self.MolarMass * self.P / Z /RT  # density [kg/m3]
         self.SG = self.MolarMass / air_molar_mass
         self.R_specific = R / self.MolarMass
 
