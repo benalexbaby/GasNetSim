@@ -580,6 +580,12 @@ class Network:
             logging.debug(max([abs(x) for x in (delta_flow/target_flow)]))
             logging.debug(delta_p)
 
+            # print(f"Current iteration number: {n_iter}")
+            # print(f"Volumetric flow target: {f_target}")
+            # print(f"Error between calculated flow and the target flow: {delta_flow}")
+            # print(f"Pressure change after each iteration: {delta_p}")
+            # print(f"Nodal Pressure: {p}")
+
             # simulation does not converge
             if n_iter >= max_iter:
                 raise RuntimeError(f'Simulation not converged in {max_iter} iteration(s)!')
