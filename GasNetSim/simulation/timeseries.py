@@ -136,7 +136,7 @@ def run_time_series(network, file=None, sep=";", profile_type="energy"):
                         raise ValueError(f"Unknown profile type {profile_type}!")
                     # full_network.nodes[i].demand_type = 'energy'
                 except KeyError:
-                    pass
+                    print(f"Node index {i} is not found!")
         # simplified_network = update_network_topology(full_network)
         try:
             # network = run_snapshot(simplified_network)
