@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.WARNING)
 
 
-def read_profiles(file):
-    profiles = pd.read_csv(Path(file), sep=";")
+def read_profiles(file, sep=";"):
+    profiles = pd.read_csv(Path(file), sep=sep)
     logger.info(f'Reading profiles from {file}.')
     return profiles
 
