@@ -10,6 +10,7 @@ import pandas as pd
 from pathlib import Path
 import logging
 import copy
+from tqdm import tqdm
 
 from ..components.network import Network
 from ..components.utils.utils import plot_network_demand_distribution
@@ -109,7 +110,7 @@ def run_time_series(network, file=None, profile_type="energy"):
 
     pressure_prev = None
 
-    for t in time_steps:
+    for t in tqdm(time_steps):
         full_network = copy.deepcopy(network)
         full_network.pressure_prev = pressure_prev  # Nodal pressure values at previous time step
         if pressure_prev is None:
