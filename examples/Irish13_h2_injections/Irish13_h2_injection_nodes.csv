@@ -1,17 +1,17 @@
-node_index;pressure_pa;flow_sm3_per_s;altitude_m;temperature_k;gas_composition;node_type;flow_type;longitude; latitude; remarks
-1;7000000;;130;300;;reference;;;;
-2;7000000;;60;300;;reference;;;;
-3;7000000;;60;300;;reference;;;;
-4;;-5;30;;{'hydrogen':1.0};;;;;
-5;;-5;30;;{'hydrogen':1.0};;;;;
-6;;-5;30;;{'hydrogen':1.0};;;;;
-7;;40;40;;;;volumetric;;;
-8;;30;30;;;;volumetric;;;
-9;;10;60;;;;volumetric;;;
-10;;5;82;;;;volumetric;;;
-11;;5;83;;;;volumetric;;;
-12;;5;85;;;;volumetric;;;
-13;;60;30;;;;volumetric;;;
-14;;10;25;;;;volumetric;;;
-15;;8;30;;;;volumetric;;;
-16;;7;100;;;;volumetric;;;
+node_index;pressure_pa;flow_sm3_per_s;flow_MW;altitude_m;temperature_k;gas_composition;node_type;flow_type;longitude; latitude; remarks
+1;7000000;;;130;300;;reference;;;;
+2;7000000;;;60;300;;reference;;;;
+3;7000000;;;60;300;;reference;;;;
+4;;-5;;30;;{'hydrogen':1.0};;;;;
+5;;-5;;30;;{'hydrogen':1.0};;;;;
+6;;-5;;30;;{'hydrogen':1.0};;;;;
+7;;40;;40;;;;volumetric;;;
+8;;30;;30;;;;volumetric;;;
+9;;10;;60;;;;volumetric;;;
+10;;5;;82;;;;volumetric;;;
+11;;5;;83;;;;volumetric;;;
+12;;5;;85;;;;volumetric;;;
+13;;60;;30;;;;volumetric;;;
+14;;10;;25;;;;volumetric;;;
+15;;8;;30;;;;volumetric;;;
+16;;7;;100;;;;volumetric;;;
