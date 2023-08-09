@@ -159,3 +159,64 @@ def plot_network_demand_distribution(network):
     plt.xlabel("Nodal volumetric flow demand [sm^3/s]")
     plt.show()
     return None
+
+
+def check_square_matrix(a):
+    return a.shape[0] == a.shape[1]
+
+def check_symmetric(a, rtol=1e-05, atol=1e-08):
+    return np.allclose(a, a.T, rtol=rtol, atol=atol)
+
+
+def check_all_off_diagonal_elements(a, criterion):
+    res = True
+
+    if check_square_matrix(a):
+        pass
+    else:
+        print("Matrix is not a square matrix!")
+
+    for i in range(a.shape[0]):
+        for j in range(a.shape[1]):
+            if i != j:
+                if criterion == "zero":
+                    res = (a[i][j] == 0)
+                elif criterion == "positive":
+                    res = (a[i][j] > 0)
+                elif criterion == "non-negative":
+                    res = (a[i][j] >= 0)
+                elif criterion == "negative":
+                    res = (a[i][j] < 0)
+                elif criterion == "non-positive":
+                    res = (a[i][j] <= 0)
+                else:
+                    print("Check the given criterion!")
+                    return False
+                if res == False:
+                    return False
+    return res
+
+
+def check_all_diagonal_elements(a, criterion):
+    res = True
+
+    if check_square_matrix(a):
+        pass
+    else:
+        print("Matrix is not a square matrix!")
+
+    if criterion == "zero":
+        res = (np.diagonal(a) == 0).all()
+    elif criterion == "positive":
+        res = (np.diagonal(a) > 0).all()
+    elif criterion == "non-negative":
+        res = (np.diagonal(a) >= 0).all()
+    elif criterion == "negative":
+        res = (np.diagonal(a) < 0).all()
+    elif criterion == "non-positive":
+        res = (np.diagonal(a) <= 0).all()
+    else:
+        print("Check the given criterion!")
+        return False
+
+    return res
