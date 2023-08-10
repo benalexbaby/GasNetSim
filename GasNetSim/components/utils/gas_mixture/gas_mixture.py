@@ -8,6 +8,7 @@
 #   *****************************************************************************
 from collections import OrderedDict
 import logging
+from scipy.constants import atm, zero_Celsius
 
 # from .thermo.thermo import Mixture
 from thermo import Mixture
