@@ -185,7 +185,7 @@ class GasMixtureGERG2008:
 
         self.PropertiesGERG()
 
-    def CalculateHeatingValue(self, comp, hhv, parameter):
+    def CalculateHeatingValue(self, comp, parameter, hhv=True):
 
         dict_components = {'methane': {'C': 1, 'H': 4},
                            'nitrogen': {'N': 2},
