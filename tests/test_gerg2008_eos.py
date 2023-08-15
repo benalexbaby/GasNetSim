@@ -9,8 +9,6 @@
 from GasNetSim.components.utils.gas_mixture.GERG2008.gerg2008 import *
 from scipy.constants import bar
 from numpy.testing import assert_almost_equal
-from numba.typed import Dict
-
 
 def test_gerg_function_with_original_cpp_implementation():
     nist_gas_mixture = {}
