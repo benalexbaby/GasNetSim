@@ -9,6 +9,7 @@
 from GasNetSim.components.utils.gas_mixture.GERG2008.gerg2008 import *
 from scipy.constants import bar
 from numpy.testing import assert_almost_equal
+from numba.typed import Dict
 
 
 def test_gerg_function_with_original_cpp_implementation():
@@ -21,6 +22,10 @@ def test_gerg_function_with_original_cpp_implementation():
          0.004, 0.005, 0.002, 0.0001, 0.0025, 0.007, 0.001]
     for i in range(21):
         nist_gas_mixture[a[i]] = b[i]
+
+    numba_nist_gas_mixture = Dict()
+    for k, v in nist_gas_mixture.items():
+        numba_nist_gas_mixture[k] = v
 
     gas_mixture = GasMixtureGERG2008(500 * bar, 400, nist_gas_mixture)
 
@@ -93,3 +98,7 @@ def test_gerg_function_with_original_cpp_implementation():
     assert_almost_equal(nist_results["Joule-Thomson coefficient [K/kPa]"],
                         my_results["Joule-Thomson coefficient [K/kPa]"])
     assert_almost_equal(nist_results["Isentropic exponent"], my_results["Isentropic exponent"])
+
+
+if __name__ == "__main__":
+    test_gerg_function_with_original_cpp_implementation()
