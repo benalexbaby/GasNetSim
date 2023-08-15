@@ -16,7 +16,7 @@ from .gas_mixture import *
 GAS = ct.Solution('gri30.cti')
 
 
-def get_mole_fraction(gas_mixture: GasMixture):
+def get_mole_fraction(gas_mixture):
     """
     Get mole fraction of the gas composition at node
     :return: Gas mole fraction

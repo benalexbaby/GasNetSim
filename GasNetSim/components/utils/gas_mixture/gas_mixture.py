@@ -8,10 +8,12 @@
 #   *****************************************************************************
 from collections import OrderedDict
 import logging
+from scipy.constants import atm, zero_Celsius
 
 # from .thermo.thermo import Mixture
 from thermo import Mixture
 from .GERG2008.gerg2008 import *
+from .heating_value import calc_heating_value
 
 
 class GasMixture:
@@ -74,6 +76,17 @@ class GasMixture:
             return self.gerg2008_mixture.rho
 
     @property
+    def standard_density(self):
+        if self.method == "PREOS":
+            return GasMixtureGERG2008(P_Pa=1*atm,
+                                      T_K=15+zero_Celsius,
+                                      composition=self.composition).rho
+        elif self.method == "GERG-2008":
+            return Mixture(P=1*atm,
+                           T=15+zero_Celsius,
+                           zs=self.composition).rho
+
+    @property
     def joule_thomson_coefficient(self):
         if self.method == "PREOS":
             return self.thermo_mixture.JT
@@ -100,3 +113,11 @@ class GasMixture:
             return self.thermo_mixture.R_specific
         elif self.method == "GERG-2008":
             return self.gerg2008_mixture.R_specific
+
+    def heating_value(self, hhv=True, parameter="volume"):
+        if self.method == "PREOS":
+            return calc_heating_value(self, heating_value_type=type)
+        elif self.method == "GERG-2008":
+            return self.gerg2008_mixture.CalculateHeatingValue(comp=self.composition,
+                                                               parameter=parameter,
+                                                               hhv=hhv)
