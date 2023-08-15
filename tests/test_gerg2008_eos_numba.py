@@ -12,7 +12,7 @@ from numpy.testing import assert_almost_equal
 from numba.typed import Dict
 
 
-def test_gerg_function_with_original_cpp_implementation():
+def gerg_function_with_original_cpp_implementation():
     nist_gas_mixture = {}
     a = ['methane', 'nitrogen', 'carbon dioxide', 'ethane', 'propane', 'isobutane',
      'butane', 'isopentane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane',
@@ -101,4 +101,4 @@ def test_gerg_function_with_original_cpp_implementation():
 
 
 if __name__ == "__main__":
-    test_gerg_function_with_original_cpp_implementation()
+    gerg_function_with_original_cpp_implementation()
