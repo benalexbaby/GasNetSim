@@ -13,6 +13,7 @@ from scipy.constants import atm, zero_Celsius
 # from .thermo.thermo import Mixture
 from thermo import Mixture
 from .GERG2008.gerg2008 import *
+from .heating_value import calc_heating_value
 
 
 class GasMixture:
@@ -112,3 +113,11 @@ class GasMixture:
             return self.thermo_mixture.R_specific
         elif self.method == "GERG-2008":
             return self.gerg2008_mixture.R_specific
+
+    def heating_value(self, hhv=True, parameter="volume"):
+        if self.method == "PREOS":
+            return calc_heating_value(self, heating_value_type=type)
+        elif self.method == "GERG-2008":
+            return self.gerg2008_mixture.CalculateHeatingValue(comp=self.composition,
+                                                               parameter=parameter,
+                                                               hhv=hhv)
