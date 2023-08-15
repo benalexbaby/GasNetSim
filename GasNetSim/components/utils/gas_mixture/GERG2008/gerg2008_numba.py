@@ -102,6 +102,9 @@ import math
 from collections import Counter
 from .setup import *
 from copy import deepcopy
+from numba import jit
+from numba.experimental import jitclass
+from numba.typed import Dict
 
 from GasNetSim.components.utils.gas_mixture.GERG2008.setup import *
 
@@ -178,11 +181,11 @@ class GasMixtureGERG2008:
         self.R_specific = 0
         self.viscosity = 2e-4  # TODO add function
 
-        self.HHV = self.CalculateHeatingValue(comp=composition, hhv=True, parameter="volume")
+        # self.HHV = self.CalculateHeatingValue(comp=composition, hhv=True, parameter="volume")
 
         self.PropertiesGERG()
 
-    def CalculateHeatingValue(self, comp, hhv, parameter):
+    def CalculateHeatingValue(self, comp, parameter, hhv=True):
 
         dict_components = {'methane': {'C': 1, 'H': 4},
                            'nitrogen': {'N': 2},
@@ -206,6 +209,14 @@ class GasMixtureGERG2008:
                            'helium': {'He': 1},
                            'argon': {'Ar': 1}}
                            # 'SO2': {'S': 1, 'O': 2}}
+
+        d1 = Dict()
+        for k, v in dict_components.items():
+            d1[k] = v
+
+        d4 = Dict()
+        for k, v in comp.items():
+            d4[k] = v
         # 298 K
         # dict_enthalpy_mole = {'methane': -74602.416533355,
         #                       'nitrogen': 0.0,
@@ -260,6 +271,10 @@ class GasMixtureGERG2008:
                               # 'O': 249190.0,
                               # 'SO2': -296840.0}
 
+        d2 = Dict()
+        for k, v in dict_enthalpy_mole.items():
+            d2[k] = v
+
         # # reactants
         # atom_list = []
         # new_dict = {}
@@ -280,9 +295,9 @@ class GasMixtureGERG2008:
         atom_list = []
 
         for key, value in comp.items():
-            for key1, value1 in dict_components.items():
+            for key1, value1 in d1.items():
                 if key == key1:
-                    atom_list.append(dict((x, y * value) for x, y in dict_components.get(key1, {}).items()))
+                    atom_list.append(dict((x, y * value) for x, y in d1.get(key1, {}).items()))
 
         reactants_atom = Counter()
         for d in atom_list:
@@ -294,6 +309,10 @@ class GasMixtureGERG2008:
         n_H2O = reactants_atom["H"] / 2
         products_dict = {'carbon dioxide': n_CO2, 'sulfur dioxide': n_SO2, 'water': n_H2O}
 
+        d3 = Dict()
+        for k, v in products_dict.items():
+            d3[k] = v
+
         # oxygen for complete combustion
         n_O = n_CO2 * 2 + n_SO2 * 2 + n_H2O * 1  # 2 is number of O atoms in CO2 AND SO2 and 1 is number of O atoms in H2O
         n_O2 = n_O / 2
@@ -302,7 +321,7 @@ class GasMixtureGERG2008:
 
         # LHV calculation
         LHV = 0
-        for key, value in dict_enthalpy_mole.items():
+        for key, value in d2.items():
             for key1, value1 in reactants_dict.items():
                 if key == key1:
                     LHV += value * value1
@@ -344,6 +363,7 @@ class GasMixtureGERG2008:
 
         return gerg_composition
 
+    @jit
     def MolarMassGERG(self):
         """
 
@@ -358,6 +378,7 @@ class GasMixtureGERG2008:
             Mm += self.x[i] * MMiGERG[i]
         return Mm
 
+    @jit
     def PressureGERG(self, D):
         """
         Sub PressureGERG(T, D, x, P, Z)
@@ -379,6 +400,7 @@ class GasMixtureGERG2008:
         dPdDsave = RGERG * T * (1 + 2 * ar[0][1] + ar[0][2])
         return P, Z, dPdDsave
 
+    @jit
     def DensityGERG(self, iFlag=0):
         """
         Sub DensityGERG(iFlag, T, P, x, D, ierr, herr)
@@ -498,6 +520,7 @@ class GasMixtureGERG2008:
         D = P / RGERG / T
         return ierr, herr, D
 
+    @jit
     def PropertiesGERG(self):
         """
         Sub PropertiesGERG(T, D, x, P, Z, dPdD, d2PdD2, d2PdTD, dPdT, U, H, S, Cv, Cp, W, G, JT, Kappa, A)
@@ -590,10 +613,11 @@ class GasMixtureGERG2008:
         self.gibbs_energy = G  # Gibbs energy [J/mol]
         self.JT = JT / 1e3  # Joule-Thomson coefficient [K/Pa]
         self.isentropic_exponent = Kappa  # Isentropic exponent
-        self.rho = self.MolarMass * self.P / Z /RT  # density [kg/m3]
+        self.rho = self.MolarMass * self.P * 1000 / RT
         self.SG = self.MolarMass / air_molar_mass
         self.R_specific = R / self.MolarMass
 
+    @jit
     def Alpha0GERG(self):
         """
         Private Sub Alpha0GERG(T, D, x, a0)
@@ -618,7 +642,7 @@ class GasMixtureGERG2008:
         hcn = 0.0
         hsn = 0.0
 
-        a0 = [0] * 3
+        a0 = np.zeros(3)
         if D > epsilon:
             LogD = math.log(D)
         else:
@@ -653,6 +677,7 @@ class GasMixtureGERG2008:
             a0[2] += -x[i] * (n0i[i][3] + SumHyp2)
         return a0
 
+    @jit
     # The following routines are low-level routines that should not be called outside of this code.
     def ReducingParametersGERG(self):
         """
@@ -704,6 +729,7 @@ class GasMixtureGERG2008:
 
         return Tr, Dr
 
+    @jit
     def AlpharGERG(self, itau, idelta, D):
         """
         Private Sub AlpharGERG(itau, idelta, T, D, x, ar)
@@ -730,9 +756,9 @@ class GasMixtureGERG2008:
         global Told, Trold, Trold2, Drold
 
         global Tr, Dr
-        delp = [0] * (7+1)
-        Expd = [0] * (7+1)
-        ar = [[0] * 4 for _ in range(4)]
+        delp = np.zeros(7+1)
+        Expd = np.zeros(7+1)
+        ar = np.zeros((4, 4))
 
         for i in range(4):
             for j in range(4):
@@ -827,7 +853,7 @@ class GasMixtureGERG2008:
                                     ar[0][3] += ndt * (ex * (ex2 - 2 * (dijk[mn][k] - 2 * cij0)) + 2 * dijk[mn][k])
         return ar
 
-
+    @jit
     def tTermsGERG(self, lntau, x):
         """
         // Private Sub tTermsGERG(lntau, x)
@@ -837,7 +863,7 @@ class GasMixtureGERG2008:
         :param x:
         :return:
         """
-        taup0 = [0] * (12+1)
+        taup0 = np.zeros(12+1)
 
         i = 5  # Use propane to get exponents for short form of EOS
         for k in range(1, int(kpol[i] + kexp[i] + 1)):  # for (int k = 1; k <= kpol[i] + kexp[i]; ++k)
