@@ -108,18 +108,18 @@ class Node:
         :return:
         """
         # HHV = calc_heating_value(self.gas_mixture)
-        HHV = self.gas_mixture.heating_value
+        HHV = self.gas_mixture.heating_value(hhv=True, parameter="mass")
         gas_comp = self.get_mole_fraction()
-        self.volumetric_flow = self.energy_flow / HHV * 1e6 / self.gas_mixture.standard_density()
+        self.volumetric_flow = self.energy_flow / HHV * 1e6 / self.gas_mixture.standard_density
 
     def convert_volumetric_to_energy_flow(self):
         """
         Convert volumetric flow rate (sm^3/s) into energy flow rate (MW)
         :return:
         """
-        HHV = self.gas_mixture.heating_value
+        HHV = self.gas_mixture.heating_value(hhv=True, parameter="mass")
         gas_comp = self.get_mole_fraction()
-        self.energy_flow = self.volumetric_flow * HHV / 1e6 * self.gas_mixture.standard_density()
+        self.energy_flow = self.volumetric_flow * HHV / 1e6 * self.gas_mixture.standard_density
 
 
 if __name__ == "__main__":
