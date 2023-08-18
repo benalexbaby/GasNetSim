@@ -178,9 +178,9 @@ class GasMixtureGERG2008:
         self.R_specific = 0
         self.viscosity = 2e-4  # TODO add function
 
-        self.HHV = self.CalculateHeatingValue(comp=composition, hhv=True, parameter="volume")
-
         self.PropertiesGERG()
+
+        self.HHV = self.CalculateHeatingValue(comp=composition, hhv=True, parameter="volume")
 
     def CalculateHeatingValue(self, comp, hhv, parameter):
 
@@ -321,11 +321,11 @@ class GasMixtureGERG2008:
         HHV = LHV + (hw_gas - hw_liq) * products_dict["water"]
 
         if parameter == 'mass':
-            # returns heating value in kJ/kg
+            # returns heating value in MJ/kg
             if hhv:
-                heating_value = HHV / self.MolarMass
+                heating_value = HHV / self.MolarMass * 1e3
             else:
-                heating_value = LHV / self.MolarMass
+                heating_value = LHV / self.MolarMass * 1e3
         else:
             # returns heating value in kJ/m3
             if hhv:
