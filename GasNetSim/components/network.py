@@ -540,6 +540,8 @@ class Network:
                                                                     pressure=self.nodes[i_node].pressure)
                     except Exception:
                         logging.warning(i_node)
+                        logging.warning(self.nodes[i_node].temperature)
+                        logging.warning(self.nodes[i_node].pressure)
                         logging.warning(nodal_gas_inflow_composition[i_node])
 
             nodal_flow = np.dot(f_mat, np.ones(n_nodes))
