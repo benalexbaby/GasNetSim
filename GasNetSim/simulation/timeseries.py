@@ -95,7 +95,7 @@ def update_network_topology(network):
     return Network(nodes=remaining_nodes, pipelines=None, resistances=remaining_pipes)
 
 
-def run_time_series(network, file=None, sep=";", profile_type="energy"):
+def run_time_series(network, file=None, sep=";", profile_type="energy", tasks=None):
     # create a copy of the input network
     full_network = copy.deepcopy(network)
 
@@ -108,6 +108,8 @@ def run_time_series(network, file=None, sep=";", profile_type="energy"):
 
     # create error log to record the time step indices where error occurs
     error_log = list()
+
+    results = list()
 
     pressure_prev = None
 
@@ -143,10 +145,12 @@ def run_time_series(network, file=None, sep=";", profile_type="energy"):
             for n in full_network.nodes.values():
                 if n.volumetric_flow is not None and n.volumetric_flow < 0:
                     print(n.volumetric_flow)
-            full_network = copy.deepcopy(run_snapshot(full_network))
+            full_network = run_snapshot(full_network)
             pressure_prev = full_network.save_pressure_values()
+            results.append(pressure_prev)
+            results.append([x.flow_rate for x in full_network.pipelines.values()])
         except RuntimeError:
             # error_log.append([simplified_network, profiles.iloc[t]])
             error_log.append([full_network, profiles.iloc[t]])
 
-    return full_network
+    return results
