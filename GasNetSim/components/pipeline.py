@@ -165,7 +165,7 @@ class Pipeline:
         elif method == 'colebrook-white':
             return colebrook_white(epsilon=self.roughness, d=self.diameter, N_re=self.calculate_reynolds_number())
         elif method == "hagen-poiseuille":
-            hagen_poiseuille(N_re=self.calculate_reynolds_number())
+            return hagen_poiseuille(N_re=self.calculate_reynolds_number())
 
     def calculate_fictitious_resistance(self):
         tb = STANDARD_TEMPERATURE
