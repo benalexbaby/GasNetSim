@@ -41,7 +41,7 @@ def read_nodes(path_to_file: Path) -> dict:
     return nodes
 
 
-def read_pipelines(path_to_file: Path, network_nodes: dict) -> dict:
+def read_pipelines(path_to_file: Path, network_nodes: dict, conversion_factor=1.) -> dict:
     """
 
     :param path_to_file:
@@ -56,7 +56,9 @@ def read_pipelines(path_to_file: Path, network_nodes: dict) -> dict:
         pipelines[row['pipeline_index']] = Pipeline(inlet=network_nodes[row['inlet_index']],
                                                     outlet=network_nodes[row['outlet_index']],
                                                     diameter=row['diameter_m'],
-                                                    length=row['length_m'])
+                                                    length=row['length_m'],
+                                                    friction_factor_method=row['friction_method'],
+                                                    conversion_factor=conversion_factor)
     return pipelines
 
 
@@ -123,7 +125,7 @@ def read_shortpipes(path_to_file: Path, network_nodes: dict) -> dict:
     return shortpipes
 
 
-def create_network_from_csv(path_to_folder: Path) -> Network:
+def create_network_from_csv(path_to_folder: Path, conversion_factor=1.) -> Network:
     """
 
     :param path_to_folder:
@@ -144,7 +146,7 @@ def create_network_from_csv(path_to_folder: Path) -> Network:
         if 'node' in file_name:
             pass
         elif 'pipeline' in file_name:
-            pipelines = read_pipelines(file, nodes)
+            pipelines = read_pipelines(file, nodes, conversion_factor)
             network_components['pipeline'] = pipelines
         elif 'compressor' in file_name:
             compressors = read_compressors(file)
