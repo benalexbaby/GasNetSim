@@ -140,7 +140,7 @@ class Pipeline:
                                   rho=self.gas_mixture.density, viscosity=self.gas_mixture.viscosity)
         else:
             # if the flow rate cannot be calculated yet, set the Reynolds number to be 1e7
-            return 1e7
+            return None
 
     def calculate_pipe_friction_factor(self):
         """
@@ -159,6 +159,10 @@ class Pipeline:
         else:
             raise ValueError(f'Friction calculation method {method} is not defined! Choose on from '
                              f'{implemented_methods} or implement you own in friction_factor.py')
+
+        if self.calculate_reynolds_number() is None:
+            warnings.warn("There is no Reynolds number available, using 0.01 for friction factor!")
+            return 0.01
 
         if method == 'weymouth':
             return 0.0093902 / (self.diameter ** (1 / 3))
