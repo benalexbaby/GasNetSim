@@ -28,7 +28,7 @@ class Pipeline:
 
     def __init__(self, inlet: Node, outlet: Node, diameter, length, efficiency=0.85, roughness=0.000015,
                  ambient_temp=15+zero_Celsius, ambient_pressure=1*atm, heat_transfer_coefficient=3.69, valve=0,
-                 friction_factor_method='chen'):
+                 friction_factor_method='chen', conversion_factor=1.):
         """
 
         :param inlet: Gas pipe inlet node
@@ -56,6 +56,7 @@ class Pipeline:
         self.valve = valve
         self.gas_mixture = self.inlet.gas_mixture
         self.friction_factor_method = friction_factor_method
+        self.conversion_factor = conversion_factor
 
     def update_gas_mixture(self):
         self.gas_mixture = self.inlet.gas_mixture
@@ -131,7 +132,10 @@ class Pipeline:
         :return: Reynolds number
         """
         if self.flow_rate is not None:
-            flow_velocity = self.calc_flow_velocity()
+            flow_velocity = abs(self.calc_flow_velocity() / self.conversion_factor)
+            # if np.isnan(reynold_number(diameter=self.diameter, velocity=flow_velocity,
+            #                       rho=self.gas_mixture.density, viscosity=self.gas_mixture.viscosity)):
+            #     print(self.flow_rate, self.diameter, flow_velocity, self.gas_mixture.density, self.gas_mixture.viscosity)
             return reynold_number(diameter=self.diameter, velocity=flow_velocity,
                                   rho=self.gas_mixture.density, viscosity=self.gas_mixture.viscosity)
         else:
@@ -249,7 +253,9 @@ class Pipeline:
         p2 = self.outlet.pressure
 
         slope_correction = self.calc_pipe_slope_correction()
-        tmp = self.calculate_coefficient_for_iteration()
+        tmp = self.calculate_coefficient_for_iteration() * self.conversion_factor
+
+        self.flow_rate = flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * tmp
 
         return flow_direction * abs(p1 ** 2 - p2 ** 2 - slope_correction) ** (1 / 2) * tmp
 
@@ -257,7 +263,7 @@ class Pipeline:
         p1 = self.inlet.pressure
         p2 = self.outlet.pressure
         slope_corr = self.calc_pipe_slope_correction()
-        pipeline_coefficient = self.calculate_coefficient_for_iteration()
+        pipeline_coefficient = self.calculate_coefficient_for_iteration()  * self.conversion_factor
         tmp = (abs(p1 ** 2 - p2 ** 2 - slope_corr)) ** (-0.5)
 
         if is_inlet:
@@ -281,7 +287,7 @@ class Pipeline:
         Calculate pipe outlet temperature based on the physical law of flow temperature loss
         :return: Pipe outlet temperature
         """
-        qm = abs(self.calc_gas_mass_flow())
+        qm = abs(self.calc_gas_mass_flow()) / self.conversion_factor
         friction = self.calculate_pipe_friction_factor()
         if qm is not None and friction is not None and self.gas_mixture.heat_capacity_constant_pressure is not None:
             beta = calculate_beta_coefficient(ul=3.69,
