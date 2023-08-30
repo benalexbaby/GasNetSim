@@ -16,9 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests and validations of gas mixture properties calculation using the _thermo_ package and the GERG-2008 EOS
 
 ### Changed
+- Change `Cantera` dependency to `v3.0.0`
 - Fixed pipeline outlet temperature calculation
 - Fixed GERG-2008 implementation
 - Set default gas mixture EOS for simulation to GERG-2008
 
 ### Removed
-- Local adapted implementation of _thermo_ package
+- Local adapted implementation of `thermo` package
