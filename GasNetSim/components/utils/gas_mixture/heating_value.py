@@ -13,7 +13,7 @@ import cantera as ct
 from thermo import Mixture
 from .gas_mixture import *
 
-GAS = ct.Solution('gri30.cti')
+GAS = ct.Solution('gri30.yaml')
 
 
 def get_mole_fraction(gas_mixture):
