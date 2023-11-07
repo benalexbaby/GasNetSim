@@ -98,6 +98,8 @@ def update_network_topology(network):
 def run_time_series(network, file=None, sep=";", profile_type="energy"):
     # create a copy of the input network
     full_network = copy.deepcopy(network)
+    results_to_save = ["nodal_pressure", "pipeline_flowrate", "nodal_gas_composition"]
+    results = dict([(k, []) for k in results_to_save])
 
     # read profile
     if file is not None:
@@ -149,4 +151,20 @@ def run_time_series(network, file=None, sep=";", profile_type="energy"):
             # error_log.append([simplified_network, profiles.iloc[t]])
             error_log.append([full_network, profiles.iloc[t]])
 
-    return full_network
+        results = save_time_series_results(full_network, results, nodal_pressure=True, pipeline_flowrate=True,
+                                           nodal_gas_composition=True)
+
+    return results
+
+
+def save_time_series_results(network, results, nodal_pressure=True, pipeline_flowrate=True, nodal_gas_composition=True):
+    if nodal_pressure:
+        results["nodal_pressure"].append([node.pressure for node in network.nodes.values()])
+
+    if nodal_gas_composition:
+        results["nodal_gas_composition"].append([node.gas_mixture.composition for node in network.nodes.values()])
+
+    if pipeline_flowrate:
+        results["pipeline_flowrate"].append([pipe.flow_rate for pipe in network.pipelines.values()])
+
+    return results
